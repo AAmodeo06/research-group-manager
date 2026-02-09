@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Cosimo Mandrillo
+//Realizzato da: Cosimo Mandrillo
 
 namespace App\Http\Controllers;
 
@@ -10,12 +10,14 @@ use Illuminate\Http\Request;
 
 class MilestoneController extends Controller
 {
-    private function authorizePi(Project $project)
+    private function authorizeProjectManagement(Project $project)
     {
-        abort_unless(
-            auth()->user()->isPiOfProject($project),
-            403
-        );
+        $isAuthorized = $project->users()
+            ->where('users.id', auth()->id())
+            ->whereIn('project_user.role', ['pi', 'manager'])
+            ->exists();
+
+        abort_unless($isAuthorized, 403);
     }
 
     public function index(Project $project)
@@ -25,14 +27,14 @@ class MilestoneController extends Controller
 
     public function create(Project $project)
     {
-        $this->authorizePi($project);
+        $this->authorizeProjectManagement($project);
 
         return view('milestones.create', compact('project'));
     }
 
     public function store(Request $request, Project $project)
     {
-        $this->authorizePi($project);
+        $this->authorizeProjectManagement($project);
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
@@ -49,14 +51,14 @@ class MilestoneController extends Controller
 
     public function edit(Project $project, Milestone $milestone)
     {
-        $this->authorizePi($project);
+        $this->authorizeProjectManagement($project);
 
         return view('milestones.edit', compact('project', 'milestone'));
     }
 
     public function update(Request $request, Project $project, Milestone $milestone)
     {
-        $this->authorizePi($project);
+        $this->authorizeProjectManagement($project);
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
@@ -73,7 +75,7 @@ class MilestoneController extends Controller
 
     public function destroy(Project $project, Milestone $milestone)
     {
-        $this->authorizePi($project);
+        $this->authorizeProjectManagement($project);
 
         $milestone->delete();
 

@@ -1,5 +1,7 @@
 <?php
 
+//Realizzato da: Andrea Amodeo
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +25,7 @@ class TaskFactory extends Factory
             'title'       => 'Task: ' . $this->faker->sentence(3),
             'description' => $this->faker->optional()->paragraph(),
             'due_date'    => $this->faker->optional()->date(),
-            'status'      => $this->faker->randomElement(['open','in_progress','done']),
+            'status'      => $this->faker->randomElement(['open','in_progress','completed']),
             'priority'    => $this->faker->randomElement(['low','medium','high']),
         ];
     }

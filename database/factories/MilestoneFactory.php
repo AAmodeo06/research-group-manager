@@ -1,5 +1,7 @@
 <?php
 
+//Realizzato da: Cosimo Mandrillo
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +24,7 @@ class MilestoneFactory extends Factory
         return [
             'title'    => 'Milestone: ' . $this->faker->words(2, true),
             'due_date' => $this->faker->date(),
-            'status'   => $this->faker->randomElement(['open','in_progress','done']),
+            'status'   => $this->faker->randomElement(['open','in_progress','completed']),
         ];
     }
 }
