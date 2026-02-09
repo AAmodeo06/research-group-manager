@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da: Luigi La Gioia
+//Realizzato da: Luigi La Gioia
 
 namespace App\Http\Controllers;
 

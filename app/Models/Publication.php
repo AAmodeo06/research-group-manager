@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Luigi La Gioia
+//Realizzato da: Luigi La Gioia
 
 namespace App\Models;
 
@@ -18,7 +18,6 @@ class Publication extends Model
         'doi',
         'status',
         'target_deadline',
-        'pdf_path',
     ];
     
     public function authors()
@@ -37,11 +36,6 @@ class Publication extends Model
         return $this->belongsToMany(User::class, 'authors')
                     ->withPivot('position', 'is_corresponding')
                     ->orderBy('authors.position');
-    }
-
-    public function tags()
-    {
-        return $this->morphToMany(Tag::class, 'taggable');
     }
 
     public function attachments()

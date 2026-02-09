@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Luigi La Gioia
+//Realizzato da: Luigi La Gioia
 
 namespace App\Http\Controllers;
 
@@ -29,7 +29,7 @@ class PublicationController extends Controller
 
     public function create()
     {
-        $projects = Project::all();
+        $projects = Project::where('group_id', auth()->user()->group_id)->get();
 
         return view('publications.create', compact('projects'));
     }
@@ -90,7 +90,8 @@ class PublicationController extends Controller
 
     public function edit(Publication $publication)
     {
-        $projects = Project::all();
+        $projects = Project::where('group_id', auth()->user()->group_id)->get();
+
         $publication->load('projects');
 
         return view('publications.edit', compact('publication', 'projects'));
