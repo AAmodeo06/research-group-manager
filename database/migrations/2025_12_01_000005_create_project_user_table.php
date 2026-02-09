@@ -1,9 +1,10 @@
 <?php
+
+//Realizzato da: Cosimo Mandrillo
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
-// Realizzato da Cosimo Mandrillo
 
 return new class extends Migration {
     public function up(): void {
@@ -11,7 +12,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('role')->nullable();     // pi, project_manager, researcher, collaborator
+            $table->enum('role', ['pi', 'manager', 'researcher', 'collaborator']);
             $table->decimal('effort', 4, 2)->nullable();
             $table->timestamps();
             $table->unique(['project_id','user_id']);

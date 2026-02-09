@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da: Cosimo Mandrillo
+//Realizzato da: Cosimo Mandrillo
 
 namespace App\Http\Controllers;
 
@@ -37,7 +37,7 @@ class ProjectController extends Controller
             ->with(['milestones', 'tags', 'publications', 'users', 'attachments']);
 
         // Se non è PI, vede solo i progetti del gruppo a cui partecipa
-        if ($user->role !== 'pi') {
+        if ($user->global_role !== 'pi') {
             $query->whereHas('users', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
             });
@@ -50,7 +50,7 @@ class ProjectController extends Controller
 
     public function create()
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        abort_unless(auth()->user()->global_role === 'pi', 403);
         abort_unless(auth()->user()->group_id !== null, 403);
 
         return view('projects.create');
@@ -58,7 +58,7 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        abort_unless(auth()->user()->global_role === 'pi', 403);
         abort_unless(auth()->user()->group_id !== null, 403);
 
         $validated = $request->validate([
@@ -67,7 +67,7 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Open,In progress,Completed',
+            'status' => 'required|string|in:Planned,In progress,Completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
@@ -119,7 +119,7 @@ class ProjectController extends Controller
         ]);
 
         // Se non PI, deve essere membro del progetto
-        if (auth()->user()->role !== 'pi') {
+        if (auth()->user()->global_role !== 'pi') {
             $isMember = $project->users()
                 ->where('users.id', auth()->id())
                 ->exists();
@@ -163,7 +163,7 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Open,In progress,Completed',
+            'status' => 'required|string|in:Planned,In progress,Completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
@@ -247,7 +247,7 @@ class ProjectController extends Controller
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role' => 'required|in:pi,manager,researcher,collaborator',
+            'role' => 'required|in:manager,researcher,collaborator',
             'effort' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -257,12 +257,6 @@ class ProjectController extends Controller
         if ($user->group_id !== auth()->user()->group_id) {
             return back()->withErrors([
                 'user_id' => 'Puoi assegnare al progetto solo utenti del tuo gruppo di ricerca.'
-            ]);
-        }
-
-        if ($validated['role'] === 'pi' && $user->role !== 'pi') {
-            return back()->withErrors([
-                'role' => 'Solo un utente con ruolo globale PI può essere assegnato come PI del progetto.'
             ]);
         }
 
