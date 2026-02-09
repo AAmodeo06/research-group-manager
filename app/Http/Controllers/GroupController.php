@@ -1,10 +1,12 @@
 <?php
 
-// Realizzato da Cosimo Mandrillo
+//Realizzato da: Cosimo Mandrillo
 
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
@@ -16,7 +18,7 @@ class GroupController extends Controller
         $user = auth()->user();
 
         // Solo il PI può accedere alla sezione Group
-        abort_unless($user->role === 'pi', 403);
+        abort_unless($user->global_role === 'pi', 403);
 
         // Il PI deve appartenere a un gruppo
         abort_unless($user->group, 404);
@@ -33,7 +35,7 @@ class GroupController extends Controller
     {
         $user = auth()->user();
 
-        abort_unless($user->role === 'pi', 403);
+        abort_unless($user->global_role === 'pi', 403);
         abort_unless($user->group, 404);
 
         $group = $user->group;
@@ -45,7 +47,7 @@ class GroupController extends Controller
     {
         $user = auth()->user();
 
-        abort_unless($user->role === 'pi', 403);
+        abort_unless($user->global_role === 'pi', 403);
         abort_unless($user->group, 404);
 
         $data = $request->validate([
@@ -64,7 +66,7 @@ class GroupController extends Controller
     {
         $user = auth()->user();
 
-        abort_unless($user->role === 'pi', 403);
+        abort_unless($user->global_role === 'pi', 403);
         abort_unless($user->group, 404);
 
         $data = $request->validate([
@@ -72,6 +74,15 @@ class GroupController extends Controller
         ]);
 
         $member = User::findOrFail($data['user_id']);
+
+        // 1) VINCOLO: non puoi aggiungere te stesso
+        abort_unless($member->id !== $user->id, 422);
+
+        // 2) VINCOLO: se è già nel tuo gruppo, inutile
+        abort_unless($member->group_id !== $user->group->id, 422);
+
+        // 3) regola “forte”: l'utente deve essere libero (non in altri gruppi)
+        abort_unless($member->group_id === null, 422);
 
         $member->update([
             'group_id' => $user->group->id,
@@ -84,7 +95,7 @@ class GroupController extends Controller
     {
         $user = auth()->user();
 
-        abort_unless($user->role === 'pi', 403);
+        abort_unless($user->global_role === 'pi', 403);
         abort_unless($user->group, 404);
         abort_unless($member->group_id === $user->group->id, 403);
         abort_unless($member->id !== $user->id, 403);
