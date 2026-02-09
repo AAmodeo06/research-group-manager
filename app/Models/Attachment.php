@@ -33,9 +33,15 @@ class Attachment extends Model
 
     public function previousVersions()
     {
-        return $this->morphTo()->where('type', $this->type)
-                                 ->where('attachable_id', $this->attachable_id)
-                                 ->where('version', '<', $this->version)
-                                 ->orderByDesc('version');
+        return self::where('attachable_type', $this->attachable_type)
+            ->where('attachable_id', $this->attachable_id)
+            ->where('type', $this->type)
+            ->where('version', '<', $this->version)
+            ->orderByDesc('version');
     }
+
+    public const TYPE_PROJECT_FILE = 'project_file';
+    public const TYPE_PUBLICATION_PDF = 'publication_pdf';
+    public const TYPE_SUPPLEMENTARY = 'supplementary';
+
 }

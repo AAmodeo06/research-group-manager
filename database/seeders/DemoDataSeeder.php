@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
+
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Project;
@@ -20,10 +21,10 @@ class DemoDataSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // 1) Gruppi
+        // Gruppi
         $groups = Group::factory()->count(3)->create();
 
-        // 2) Utenti
+        // Utenti
         $allUsers = collect();
 
         foreach ($groups as $group) {
@@ -32,7 +33,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'pi_' . $group->id . '@example.com',
                 'name'  => 'PI ' . $group->id,
                 'password' => Hash::make('password'),
-                'role'  => 'pi',
+                'global_role' => 'pi',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
             ]);
@@ -41,7 +42,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'manager_' . $group->id . '@example.com',
                 'name'  => 'Manager ' . $group->id,
                 'password' => Hash::make('password'),
-                'role'  => 'manager',
+                'global_role' => 'manager',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
             ]);
@@ -50,7 +51,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'researcher_' . $group->id . '@example.com',
                 'name'  => 'Researcher ' . $group->id,
                 'password' => Hash::make('password'),
-                'role'  => 'researcher',
+                'global_role' => 'researcher',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
             ]);
@@ -59,14 +60,14 @@ class DemoDataSeeder extends Seeder
                 'email' => 'collaborator_' . $group->id . '@example.com',
                 'name'  => 'Collaborator ' . $group->id,
                 'password' => Hash::make('password'),
-                'role'  => 'collaborator',
+                'global_role' => 'collaborator',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
             ]);
 
             $extraUsers = User::factory()->count(8)->create([
                 'group_id' => $group->id,
-                'role' => $faker->randomElement(['researcher', 'collaborator']),
+                'global_role' => $faker->randomElement(['researcher', 'collaborator']),
                 'email_verified_at' => now(),
             ]);
 
@@ -75,14 +76,14 @@ class DemoDataSeeder extends Seeder
                 ->merge($extraUsers);
         }
 
-        // 3) Tag
+        // Tag
         $tags = Tag::factory()->count(8)->create();
 
-        // 4) Progetti (group-centric)
+        // Progetti
         foreach ($groups as $group) {
 
             $groupUsers = $allUsers->where('group_id', $group->id);
-            $piForProject = $groupUsers->firstWhere('role', 'pi');
+            $piForProject = $groupUsers->firstWhere('global_role', 'pi');
 
             $projects = Project::factory()->count(3)->create([
                 'group_id' => $group->id,
@@ -104,7 +105,7 @@ class DemoDataSeeder extends Seeder
                 foreach ($members as $m) {
                     $project->users()->syncWithoutDetaching([
                         $m->id => [
-                            'role' => $m->role,
+                            'role' => $m->global_role,
                             'effort' => $faker->randomFloat(2, 0.1, 0.8),
                         ],
                     ]);
@@ -116,10 +117,12 @@ class DemoDataSeeder extends Seeder
                 ]);
 
                 // Task
-                Task::factory()->count(6)->make()->each(function ($t) use ($project, $groupUsers) {
+                Task::factory()->count(6)->make()->each(function ($t) use ($project, $groupUsers, $tags) {
                     $t->project_id = $project->id;
                     $t->assignee_id = $groupUsers->random()->id;
                     $t->save();
+
+                    $t->tags()->attach($tags->random(2)->pluck('id'));
                 });
 
                 // Pubblicazioni
@@ -140,8 +143,6 @@ class DemoDataSeeder extends Seeder
                         ]);
                     }
 
-                    $pub->tags()->attach($tags->random(2)->pluck('id'));
-
                     $pub->attachments()->create([
                         'title' => 'Manuscript PDF',
                         'path' => 'docs/' . $pub->id . '_manuscript.pdf',
@@ -153,9 +154,6 @@ class DemoDataSeeder extends Seeder
                         'body' => 'Prima bozza pronta per revisione.',
                     ]);
                 }
-
-                // Tag progetto
-                $project->tags()->attach($tags->random(3)->pluck('id'));
 
                 // Allegato progetto
                 $project->attachments()->create([
