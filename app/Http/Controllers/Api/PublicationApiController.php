@@ -1,5 +1,7 @@
 <?php
 
+//Realizzato da: Luigi La Gioia
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -69,6 +71,12 @@ class PublicationApiController extends Controller
      */
     public function update(Request $request, Publication $publication)
     {
+        $user = $request->user();
+
+        abort_unless(
+            $publication->projects()->whereHas('users', fn ($q) => $q->where('users.id', $user->id))->exists(),403
+        );
+
         $data = $request->validate([
             'title'  => 'sometimes|string|max:255',
             'type'   => 'sometimes|string',
@@ -85,8 +93,14 @@ class PublicationApiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Publication $publication)
+    public function destroy(Request $request, Publication $publication)
     {
+        $user = $request->user();
+        
+        abort_unless(
+            $publication->projects()->whereHas('users', fn ($q) => $q->where('users.id', $user->id))->exists(),403
+        );
+
         $publication->delete();
 
         return response()->json(null, 204);

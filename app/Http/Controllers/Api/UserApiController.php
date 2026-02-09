@@ -1,5 +1,7 @@
 <?php
 
+//Realizzato da: Andrea Amodeo
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -22,9 +24,9 @@ class UserApiController extends Controller
          * - altri ruoli → solo utenti dei propri progetti
          */
 
-        if ($user->role === 'pi') {
+        if ($user->global_role === 'pi') {
             return User::with('projects:id,title')
-                ->select('id', 'name', 'email', 'role')
+                ->select('id', 'name', 'email', 'global_role')
                 ->orderBy('name')
                 ->get();
         }
@@ -37,7 +39,7 @@ class UserApiController extends Controller
                 );
             })
             ->with('projects:id,title')
-            ->select('id', 'name', 'email', 'role')
+            ->select('id', 'name', 'email', 'global_role')
             ->orderBy('name')
             ->get();
     }
