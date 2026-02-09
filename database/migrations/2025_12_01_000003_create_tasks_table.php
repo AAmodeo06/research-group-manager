@@ -1,9 +1,10 @@
 <?php
+
+//Realizzato da: Andrea Amodeo
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
-// Realizzato da Andrea Amodeo
 
 return new class extends Migration {
     public function up(): void {
@@ -15,7 +16,7 @@ return new class extends Migration {
             $table->string('title');
             $table->text('description')->nullable();
             $table->date('due_date')->nullable();
-            $table->enum('status', ['open','in_progress','done'])->default('open');
+            $table->enum('status', ['open','in_progress','completed'])->default('open');
             $table->enum('priority', ['low','medium','high'])->default('medium');
             $table->timestamps();
         });

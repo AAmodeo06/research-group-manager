@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Http\Controllers;
 
@@ -12,6 +12,17 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+
+    private function authorizeProjectManagement(Project $project)
+    {
+        $isAuthorized = $project->users()
+            ->where('users.id', auth()->id())
+            ->whereIn('project_user.role', ['pi', 'manager'])
+            ->exists();
+
+        abort_unless($isAuthorized, 403);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -28,57 +39,45 @@ class TaskController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Project $project)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        $this->authorizeProjectManagement($project);
 
-        $projects = auth()->user()->projects()->with('users')->get();
-        $users = User::all();
+        $users = $project->users;
 
-        return view('tasks.create', compact('projects', 'users'));
+        return view('tasks.create', compact('project', 'users'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Project $project)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
-
-        $projectIds = auth()->user()->projects()->pluck('projects.id');
+        $this->authorizeProjectManagement($project);
 
         $data = $request->validate([
-            'project_id'  => 'required|exists:projects,id',
             'milestone_id' => 'nullable|exists:milestones,id',
             'assignee_id' => 'nullable|exists:users,id',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date'    => 'nullable|date|after_or_equal:today',
-            'status'      => 'required|in:open,in_progress,done',
+            'status'      => 'required|in:open,in_progress,completed',
             'priority'    => 'required|in:low,medium,high',
         ]);
 
-        //l'utente deve essere membro del progetto
-        abort_unless($projectIds->contains((int) $data['project_id']),403);
-
         //se è assegnato un responsabile, deve essere membro del progetto
         if (!empty($data['assignee_id'])) {
-            $isMember = Project::find($data['project_id'])
-                ->users()
-                ->whereKey($data['assignee_id'])
-                ->exists();
-
-            abort_unless($isMember, 403);
+            abort_unless($project->users()->whereKey($data['assignee_id'])->exists(),403);
         }
 
-        $task = Task::create($data);
+        $task = $project->tasks()->create($data);
 
         if ($task->assignee_id) {
             $task->assignee->notify(new TaskAssigned($task));
         }
 
         return redirect()
-            ->route('tasks.index')
+            ->route('projects.show', $project)
             ->with('success', 'Task creato con successo.');
     }
 
@@ -102,41 +101,45 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Task $task)
+    public function edit(Project $project, Task $task)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        $this->authorizeProjectManagement($project);
 
-        $projectIds = auth()->user()->projects()->pluck('projects.id');
-        abort_unless($projectIds->contains((int) $task->project_id), 403);
+        abort_unless($task->project_id === $project->id, 403);
 
-        $projects = auth()->user()->projects()->get();
-        $users = User::all();
+        $users = $project->users;
 
-        return view('tasks.edit', compact('task', 'projects', 'users'));
+        return view('tasks.edit', compact('task', 'project', 'users'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, Project $project, Task $task)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        $this->authorizeProjectManagement($project);
 
-        $projectIds = auth()->user()->projects()->pluck('projects.id');
-        abort_unless($projectIds->contains((int) $task->project_id), 403);
+        abort_unless($task->project_id === $project->id, 403);
 
         $data = $request->validate([
-            'project_id'  => 'required|exists:projects,id',
             'milestone_id' => 'nullable|exists:milestones,id',
             'assignee_id' => 'nullable|exists:users,id',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date'    => 'nullable|date',
-            'status'      => 'required|in:open,in_progress,done',
+            'status'      => 'required|in:open,in_progress,completed',
             'priority'    => 'required|in:low,medium,high',
         ]);
 
-        abort_unless($projectIds->contains((int) $data['project_id']), 403);
+        // se è indicata una milestone, deve appartenere allo stesso progetto
+        if (!empty($data['milestone_id'])) {
+            abort_unless($project->milestones()->whereKey($data['milestone_id'])->exists(),403);
+        }
+
+        // se è indicato un assegnatario, deve essere membro del progetto
+        if (!empty($data['assignee_id'])) {
+            abort_unless($project->users()->whereKey($data['assignee_id'])->exists(),403);
+        }
 
         $oldAssignee = $task->assignee_id;
 
@@ -154,17 +157,16 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Project $project, Task $task)
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        $this->authorizeProjectManagement($project);
 
-        $projectIds = auth()->user()->projects()->pluck('projects.id');
-        abort_unless($projectIds->contains((int) $task->project_id), 403);
+        abort_unless($task->project_id === $project->id, 403);
         
         $task->delete();
 
         return redirect()
-            ->route('tasks.index')
+            ->route('projects.show', $project)
             ->with('success', 'Task eliminato.');
     }
 }

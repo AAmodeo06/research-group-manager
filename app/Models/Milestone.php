@@ -14,7 +14,7 @@ class Milestone extends Model
     protected $fillable = ['project_id','title','due_date','status'];
 
     protected $casts = [
-        'due_date' => 'datetime',
+        'due_date' => 'date',
     ];
 
     public function project()
