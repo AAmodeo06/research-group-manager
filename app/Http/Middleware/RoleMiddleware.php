@@ -1,5 +1,7 @@
 <?php
 
+//Modificato da: Cosimo Mandrillo
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -17,7 +19,7 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        if (! $user || ! in_array($user->role, $roles)) {
+        if (! $user || ! in_array($user->global_role, $roles)) {
             abort(403);
         }
 

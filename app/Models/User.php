@@ -25,7 +25,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'name',
         'email',
         'password',
-        'role',
+        'global_role',
         'group_id',
         'email_verified_at',
     ];
@@ -85,17 +85,6 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         $this->notify(new ResetPassword($token));
     }
 
-    public function roleLabel(): string
-    {
-        return match ($this->role) {
-            'pi'           => 'Principal Investigator',
-            'manager'      => 'Project Manager',
-            'researcher'   => 'Researcher',
-            'collaborator' => 'Collaborator',
-            default        => ucfirst($this->role),
-        };
-    }
-
     public function roleInProject(Project $project): ?string
     {
         return $this->projects()
@@ -111,20 +100,5 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         ->where('project_id', $project->id)
         ->where('role', 'pi')
         ->exists();
-    }
-
-    public function isManagerInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'manager';
-    }
-
-    public function isResearcherInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'researcher';
-    }
-
-    public function isCollaboratorInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'collaborator';
     }
 }
