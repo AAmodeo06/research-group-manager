@@ -10,15 +10,15 @@
 
             {{-- KPI --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                @if($user->role === 'pi')
+
+                @if($user->global_role === 'pi')
                     <div class="bg-white rounded-lg shadow p-5">
                         <p class="text-sm text-secondary-500">Progetti</p>
                         <p class="text-2xl font-semibold">{{ $projects->count() }}</p>
                     </div>
                 @endif
 
-                @if($user->role !== 'collaborator')
+                @if($user->global_role !== 'collaborator')
                     <div class="bg-white rounded-lg shadow p-5">
                         <p class="text-sm text-secondary-500">Task totali</p>
                         <p class="text-2xl font-semibold">{{ $taskStats['total'] }}</p>
@@ -44,7 +44,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- GRAFICO --}}
-                @if($user->role !== 'collaborator' && $taskStats['total'] >= 3)
+                @if($user->global_role !== 'collaborator' && $taskStats['total'] >= 3)
                     <div class="bg-white rounded-lg shadow p-6 flex flex-col">
                         <h3 class="text-sm font-semibold text-secondary-700 uppercase mb-4">
                             Stato dei task
@@ -58,8 +58,8 @@
 
                 {{-- TASK IMMINENTI --}}
                 <div class="bg-white rounded-lg shadow p-6 flex flex-col
-                    {{ ($user->role !== 'collaborator' && $taskStats['total'] >= 3) ? 'lg:col-span-2' : 'lg:col-span-3' }}">
-                    
+                    {{ ($user->global_role !== 'collaborator' && $taskStats['total'] >= 3) ? 'lg:col-span-2' : 'lg:col-span-3' }}">
+
                     <h3 class="text-sm font-semibold text-secondary-700 uppercase mb-4">
                         Task imminenti
                     </h3>
@@ -69,13 +69,9 @@
                             Nessun task assegnato.
                         </p>
                     @else
-                        <ul class="divide-y overflow-y-auto pr-2"
-                            style="max-height: 320px;">
+                        <ul class="divide-y overflow-y-auto pr-2" style="max-height: 320px;">
                             @foreach(
-                                $tasks
-                                    ->whereNotNull('due_date')
-                                    ->sortBy('due_date')
-                                    ->take(8)
+                                $tasks->whereNotNull('due_date')->sortBy('due_date')->take(8)
                                 as $task
                             )
                                 <li class="py-4 flex items-center justify-between gap-6">
@@ -92,7 +88,7 @@
 
                                     <div class="w-40 flex justify-end">
                                         <span class="text-xs font-medium px-3 py-1 rounded-full
-                                            @if($task->status === 'done') bg-green-100 text-green-700
+                                            @if($task->status === 'completed') bg-green-100 text-green-700
                                             @elseif($task->status === 'in_progress') bg-blue-100 text-blue-700
                                             @elseif($task->status === 'open') bg-gray-100 text-gray-700
                                             @else bg-red-100 text-red-700
@@ -111,7 +107,7 @@
         </div>
     </div>
 
-    @if($user->role !== 'collaborator' && $taskStats['total'] >= 3)
+    @if($user->global_role !== 'collaborator' && $taskStats['total'] >= 3)
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             new Chart(document.getElementById('taskChart'), {
@@ -125,12 +121,7 @@
                             {{ $taskStats['total'] - $taskStats['completed'] - $taskStats['in_progress'] - $taskStats['overdue'] }},
                             {{ $taskStats['overdue'] }}
                         ],
-                        backgroundColor: [
-                            '#22c55e',
-                            '#3b82f6',
-                            '#e5e7eb',
-                            '#ef4444'
-                        ],
+                        backgroundColor: ['#22c55e','#3b82f6','#e5e7eb','#ef4444'],
                         borderWidth: 0
                     }]
                 },
@@ -139,9 +130,7 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                boxWidth: 12
-                            }
+                            labels: { boxWidth: 12 }
                         }
                     },
                     maintainAspectRatio: false
