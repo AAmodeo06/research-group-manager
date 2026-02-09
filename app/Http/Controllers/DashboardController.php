@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Luigi La Gioia
+//Realizzato da: Luigi La Gioia
 
 namespace App\Http\Controllers;
 
@@ -17,58 +17,26 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $projects = collect();
-        $tasks = collect();
-        $publications = collect();
+        $projects = $user->projects()
+            ->withCount(['tasks', 'milestones'])
+            ->get();
 
-        if ($user->role === 'pi') {
+        $tasks = Task::where('assignee_id', $user->id)->get();
 
-            $projects = Project::whereHas('users', fn ($q) =>
-                $q->where('users.id', $user->id)
-                  ->where('project_user.role', 'pi')
-            )->get();
-
-            $tasks = Task::whereHas('project.users', fn ($q) =>
-                $q->where('users.id', $user->id)
-                  ->where('project_user.role', 'pi')
-            )->get();
-
-            $publications = Publication::whereHas('projects.users', fn ($q) =>
-                $q->where('users.id', $user->id)
-                  ->where('project_user.role', 'pi')
-            )->get();
-        }
-
-        if ($user->role === 'manager') {
-
-            $projects = Project::whereHas('users', fn ($q) =>
-                $q->where('users.id', $user->id)
-                  ->where('project_user.role', 'manager')
-            )->get();
-
-            $tasks = Task::whereHas('project.users', fn ($q) =>
-                $q->where('users.id', $user->id)
-                  ->where('project_user.role', 'manager')
-            )->get();
-        }
-
-        if ($user->role === 'researcher' || $user->role === 'collaborator') {
-
-            $tasks = Task::where('assignee_id', $user->id)->get();
-
-            if ($user->role === 'researcher') {
-                $publications = Publication::whereHas('authors', fn ($q) =>
-                    $q->where('user_id', $user->id)
-                )->get();
-            }
-        }
+        $publications = Publication::whereHas('projects.users', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            })
+            ->orWhereHas('authors', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->get();
 
         $taskStats = [
             'total'       => $tasks->count(),
-            'completed'   => $tasks->where('status', 'done')->count(),
+            'completed'   => $tasks->where('status', 'completed')->count(),
             'in_progress' => $tasks->where('status', 'in_progress')->count(),
             'overdue'     => $tasks->filter(fn ($t) =>
-                $t->status !== 'done' &&
+                $t->status !== 'completed' &&
                 $t->due_date &&
                 Carbon::parse($t->due_date)->isPast()
             )->count(),

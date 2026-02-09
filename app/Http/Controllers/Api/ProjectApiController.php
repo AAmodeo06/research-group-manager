@@ -1,5 +1,7 @@
 <?php
 
+//Realizzato da: Cosimo Mandrillo
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -21,7 +23,7 @@ class ProjectApiController extends Controller
                 $q->where('users.id', $user->id);
             })
             ->with([
-                'users:id,name,role',
+                'users:id,name',
                 'publications:id,title'
             ])
             ->orderBy('title')
@@ -63,7 +65,7 @@ class ProjectApiController extends Controller
         );
 
         return $project->load([
-            'users:id,name,role',
+            'users:id,name',
             'milestones',
             'tasks',
             'publications:id,title'
