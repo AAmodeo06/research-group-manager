@@ -7,7 +7,7 @@
                 Progetti di Ricerca
             </h2>
 
-            @if(auth()->user()->role === 'pi')
+            @if(auth()->user()->global_role === 'pi')
                 <a href="{{ route('projects.create') }}"
                    class="ml-auto inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
                     + Nuovo progetto

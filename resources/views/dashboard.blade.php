@@ -11,14 +11,14 @@
             {{-- KPI --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 
-                @if($user->role === 'pi')
+                @if($user->rolglobal_rolee === 'pi')
                     <div class="bg-white rounded-lg shadow p-5">
                         <p class="text-sm text-secondary-500">Progetti</p>
                         <p class="text-2xl font-semibold">{{ $projects->count() }}</p>
                     </div>
                 @endif
 
-                @if($user->role !== 'collaborator')
+                @if($user->global_role !== 'collaborator')
                     <div class="bg-white rounded-lg shadow p-5">
                         <p class="text-sm text-secondary-500">Task totali</p>
                         <p class="text-2xl font-semibold">{{ $taskStats['total'] }}</p>

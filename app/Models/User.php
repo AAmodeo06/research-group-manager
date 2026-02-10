@@ -13,38 +13,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable implements CanResetPasswordContract, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
+        'global_role',
         'group_id',
         'email_verified_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -53,78 +37,49 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         ];
     }
 
-    public function projects()
-    {
+    // HELPERS PER I RUOLI GLOBALI
+    public function isGlobalPi(): bool {
+        return $this->global_role === 'pi';
+    }
+
+    public function isSenior(): bool {
+        return in_array($this->global_role, ['pi', 'manager']);
+    }
+
+    // RELAZIONI
+    public function projects() {
         return $this->belongsToMany(Project::class)
                     ->withPivot('role', 'effort')
                     ->withTimestamps();
     }
 
-    public function assignedTasks()
-    {
-        return $this->hasMany(Task::class, 'assignee_id');
-    }
-
-    public function attachments()
-    {
-        return $this->hasMany(Attachment::class, 'uploaded_by');
-    }
-
-    public function authoredPublications()
-    {
-        return $this->hasMany(Author::class);
-    }
-
-    public function group()
-    {
+    public function group() {
         return $this->belongsTo(Group::class);
     }
 
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new ResetPassword($token));
+    // LOGICA DI PROGETTO (Corretta)
+    public function roleInProject(Project $project): ?string {
+        $member = $this->projects()->where('project_id', $project->id)->first();
+        return $member ? $member->pivot->role : null; // Prende il ruolo LOCALE dal pivot
     }
 
-    public function roleLabel(): string
-    {
-        return match ($this->role) {
+    public function isPiOfProject(Project $project): bool {
+        // Un PI globale è PI di ogni progetto, altrimenti controlliamo il pivot
+        if ($this->isGlobalPi()) return true;
+        
+        return $this->projects()
+            ->where('project_id', $project->id)
+            ->where('project_user.role', 'pi')
+            ->exists();
+    }
+
+    public function roleLabel(): string {
+        return match ($this->global_role) {
             'pi'           => 'Principal Investigator',
             'manager'      => 'Project Manager',
             'researcher'   => 'Researcher',
             'collaborator' => 'Collaborator',
-            default        => ucfirst($this->role),
+            default        => ucfirst($this->global_role ?? 'User'),
         };
-    }
-
-    public function roleInProject(Project $project): ?string
-    {
-        return $this->projects()
-            ->where('project_id', $project->id)
-            ->first()
-            ?->pivot
-            ?->role;
-    }
-
-    public function isPiOfProject(Project $project): bool
-    {
-        return $this->projects()
-        ->where('project_id', $project->id)
-        ->where('role', 'pi')
-        ->exists();
-    }
-
-    public function isManagerInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'manager';
-    }
-
-    public function isResearcherInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'researcher';
-    }
-
-    public function isCollaboratorInProject(Project $project): bool
-    {
-        return $this->roleInProject($project) === 'collaborator';
     }
 }

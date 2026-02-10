@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['pi', 'manager', 'researcher', 'collaborator']);
+            $table->enum('global_role', ['pi', 'manager', 'researcher', 'collaborator'])->default('researcher');
+            $table->enum('role', ['pi', 'manager', 'researcher', 'collaborator'])->nullable();
             $table->foreignId('group_id')->nullable()->constrained('groups')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();

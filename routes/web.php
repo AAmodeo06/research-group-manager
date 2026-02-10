@@ -37,9 +37,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::middleware('role:pi')->group(function () {
+    Route::middleware(['auth', 'verified', 'role:pi'])->group(function () {
+        // Visualizzazione del gruppo
         Route::get('/group', [GroupController::class, 'show'])
             ->name('group.show');
+
+        // Modifica del gruppo
+        Route::get('/group/edit', [GroupController::class, 'edit'])
+            ->name('group.edit');
+            
+        Route::put('/group', [GroupController::class, 'update'])
+            ->name('group.update');
+        
+        Route::post('/group/members', [GroupController::class, 'addMember'])
+            ->name('groups.members.add');
+        
+        Route::delete('/group/members/{user}', [GroupController::class, 'removeMember'])
+            ->name('groups.members.remove');
     });
 
     //Progetti

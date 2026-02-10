@@ -22,7 +22,7 @@ class UserApiController extends Controller
          * - altri ruoli → solo utenti dei propri progetti
          */
 
-        if ($user->role === 'pi') {
+        if ($user->global_role === 'pi') {
             return User::with('projects:id,title')
                 ->select('id', 'name', 'email', 'role')
                 ->orderBy('name')

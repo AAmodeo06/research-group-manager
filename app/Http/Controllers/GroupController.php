@@ -1,98 +1,113 @@
 <?php
 
-// Realizzato da Cosimo Mandrillo
-
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\SupportContext\Facades\Auth;
 
 class GroupController extends Controller
 {
     /**
-     * Display the specified resource.
+     * Visualizza la dashboard del gruppo del PI.
      */
     public function show()
     {
         $user = auth()->user();
+        
+        // Verifica che l'utente sia un PI e abbia un gruppo associato
+        abort_unless($user->global_role === 'pi', 403);
+        
+        $group = $user->group;
+        if (!$group) {
+            abort(404, "Nessun gruppo associato a questo utente.");
+        }
 
-        // Solo il PI può accedere alla sezione Group
-        abort_unless($user->role === 'pi', 403);
+        // Carica i membri e i progetti del gruppo
+        $group->load(['users', 'projects.users']);
 
-        // Il PI deve appartenere a un gruppo
-        abort_unless($user->group, 404);
+        // Recupera gli utenti che non appartengono a nessun gruppo per il dropdown
+        $availableUsers = User::whereNull('group_id')
+            ->where('global_role', '!=', 'pi')
+            ->orderBy('name')
+            ->get();
 
-        $group = $user->group->load([
-            'users',
-            'projects.users',
-        ]);
-
-        return view('groups.show', compact('group'));
+        return view('groups.show', compact('group', 'availableUsers'));
     }
 
+    /**
+     * Mostra il form di modifica del gruppo.
+     */
     public function edit()
     {
         $user = auth()->user();
-
-        abort_unless($user->role === 'pi', 403);
-        abort_unless($user->group, 404);
-
+        abort_unless($user->global_role === 'pi', 403);
+        
         $group = $user->group;
-
         return view('groups.edit', compact('group'));
     }
 
+    /**
+     * Aggiorna i dati del gruppo (nome e descrizione).
+     */
     public function update(Request $request)
     {
         $user = auth()->user();
+        abort_unless($user->global_role === 'pi', 403);
 
-        abort_unless($user->role === 'pi', 403);
-        abort_unless($user->group, 404);
-
-        $data = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
-        $user->group->update($data);
+        $user->group->update($validated);
 
-        return redirect()
-            ->route('groups.show')
-            ->with('success', 'Gruppo aggiornato correttamente.');
+        return redirect()->route('groups.show')->with('success', 'Informazioni del gruppo aggiornate con successo.');
     }
 
+    /**
+     * Aggiunge un utente esistente al gruppo del PI.
+     */
     public function addMember(Request $request)
     {
-        $user = auth()->user();
+        $me = auth()->user();
+        abort_unless($me->global_role === 'pi', 403);
 
-        abort_unless($user->role === 'pi', 403);
-        abort_unless($user->group, 404);
-
-        $data = $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $member = User::findOrFail($data['user_id']);
+        $newMember = User::findOrFail($validated['user_id']);
 
-        $member->update([
-            'group_id' => $user->group->id,
-        ]);
+        $newMember->group_id = $me->group_id; 
+        $newMember->save();
 
-        return back()->with('success', 'Utente aggiunto al gruppo.');
+        return back()->with('success', "{$newMember->name} è stato aggiunto al gruppo.");
     }
 
-    public function removeMember(User $member)
+    /**
+     * Rimuove un utente dal gruppo (imposta group_id a null).
+     */
+    public function removeMember(User $user)
     {
-        $user = auth()->user();
+        $me = auth()->user();
+        
+        abort_unless($me->global_role === 'pi', 403);
+        
+        if ($user->group_id === null) {
+            return back()->with('success', "{$user->name} non appartiene a nessun gruppo.");
+        }
 
-        abort_unless($user->role === 'pi', 403);
-        abort_unless($user->group, 404);
-        abort_unless($member->group_id === $user->group->id, 403);
-        abort_unless($member->id !== $user->id, 403);
+        abort_unless($user->group_id === $me->group_id, 403);
+        
+        if ($user->id === $me->id) {
+            return back()->withErrors(['message' => 'Non puoi rimuovere te stesso dal tuo gruppo.']);
+        }
 
-        $member->update([
-            'group_id' => null,
-        ]);
+        $user->group_id = null;
+        $user->save();
 
-        return back()->with('success', 'Utente rimosso dal gruppo.');
+        return back()->with('success', "{$user->name} rimosso dal gruppo correttamente.");
     }
 }

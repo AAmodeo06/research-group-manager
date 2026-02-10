@@ -88,9 +88,16 @@
             </section>
 
             <section>
-                <h3 class="text-sm font-semibold text-secondary-700 uppercase mb-2">
-                    Membri del progetto ({{ $project->users ? $project->users->count() : 0 }})
-                </h3>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-semibold text-secondary-700 uppercase">
+                        Membri del progetto ({{ $project->users ? $project->users->count() : 0 }})
+                    </h3>
+                    @if(auth()->user()->global_role === 'pi')
+                        <a href="{{ route('projects.members', $project) }}" class="text-sm text-primary-600 hover:underline">
+                            Gestisci membri
+                        </a>
+                    @endif
+                </div>
                 @if($project->users && $project->users->count() > 0)
                     <ul class="list-disc ml-5 space-y-1 text-sm text-secondary-900">
                         @foreach($project->users as $member)
@@ -110,7 +117,7 @@
                     <h3 class="text-sm font-semibold text-secondary-700 uppercase">
                         Milestone ({{ $project->milestones ? $project->milestones->count() : 0 }})
                     </h3>
-                    @if(auth()->user()->isPiOfProject($project))
+                    @if(auth()->user()->global_role === 'pi' || auth()->user()->global_role === 'manager')
                         <a href="{{ route('milestones.create', $project) }}" class="text-sm text-primary-600 hover:underline">
                             + Nuova milestone
                         </a>
@@ -141,7 +148,7 @@
                                     </span>
                                 </div>
 
-                                @if(auth()->user()->isPiOfProject($project))
+                                @if(auth()->user()->global_role === 'pi' || auth()->user()->global_role === 'manager')
                                     <div class="flex items-center gap-3">
                                         <a href="{{ route('milestones.edit', [$project, $ms]) }}"
                                            class="text-xs text-yellow-600 hover:underline">
@@ -164,6 +171,55 @@
                             </li>
                         @endforeach
                     </ul>
+                @endif
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-semibold text-secondary-700 uppercase">
+                        Task del progetto ({{ $project->tasks ? $project->tasks->count() : 0 }})
+                    </h3>
+                    @if(in_array(auth()->user()->global_role, ['pi', 'manager']))
+                        <a href="{{ route('tasks.create', ['project_id' => $project->id]) }}" class="text-sm text-primary-600 hover:underline">
+                            + Nuovo task
+                        </a>
+                    @endif
+                </div>
+
+                @if(!$project->tasks || $project->tasks->isEmpty())
+                    <p class="text-sm text-secondary-500">Nessun task assegnato.</p>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-secondary-200 text-sm text-secondary-900">
+                            <thead>
+                                <tr class="text-left font-semibold">
+                                    <th class="pb-2">Titolo</th>
+                                    <th class="pb-2">Assegnato a</th>
+                                    <th class="pb-2">Stato</th>
+                                    <th class="pb-2">Priorità</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-secondary-100">
+                                @foreach($project->tasks as $task)
+                                    <tr>
+                                        <td class="py-2">
+                                            <a href="{{ route('tasks.show', $task) }}" class="text-primary-600 hover:underline">
+                                                {{ $task->title }}
+                                            </a>
+                                        </td>
+                                        <td class="py-2">{{ $task->assignee->name ?? 'Non assegnato' }}</td>
+                                        <td class="py-2">
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-medium 
+                                                {{ $task->status === 'done' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                {{ ucfirst($task->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-2">{{ ucfirst($task->priority) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 @endif
             </section>
 
@@ -191,7 +247,7 @@
                     ← Torna ai progetti
                 </a>
 
-                @if(auth()->user()->isPiOfProject($project))
+                @if(auth()->user()->global_role === 'pi')
                     <div class="flex items-center gap-3">
                         <a href="{{ route('projects.edit', $project) }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
                             Modifica

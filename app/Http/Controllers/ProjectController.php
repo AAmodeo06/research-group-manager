@@ -37,7 +37,7 @@ class ProjectController extends Controller
             ->with(['milestones', 'tags', 'publications', 'users', 'attachments']);
 
         // Se non è PI, vede solo i progetti del gruppo a cui partecipa
-        if ($user->role !== 'pi') {
+        if ($user->global_role !== 'pi') {
             $query->whereHas('users', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
             });
@@ -50,7 +50,7 @@ class ProjectController extends Controller
 
     public function create()
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        abort_unless(auth()->user()->global_role === 'pi', 403);
         abort_unless(auth()->user()->group_id !== null, 403);
 
         return view('projects.create');
@@ -58,7 +58,7 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        abort_unless(auth()->user()->global_role === 'pi', 403);
         abort_unless(auth()->user()->group_id !== null, 403);
 
         $validated = $request->validate([
@@ -119,7 +119,7 @@ class ProjectController extends Controller
         ]);
 
         // Se non PI, deve essere membro del progetto
-        if (auth()->user()->role !== 'pi') {
+        if (auth()->user()->global_role !== 'pi') {
             $isMember = $project->users()
                 ->where('users.id', auth()->id())
                 ->exists();

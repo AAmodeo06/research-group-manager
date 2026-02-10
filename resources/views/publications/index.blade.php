@@ -8,7 +8,7 @@
                 Pubblicazioni
             </h2>
 
-            @if(auth()->user()->role === 'pi' || auth()->user()->role === 'researcher')
+            @if(auth()->user()->global_role === 'pi' || auth()->user()->role === 'researcher')
                 <a href="{{ route('publications.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
                     + Nuova pubblicazione

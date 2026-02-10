@@ -20,10 +20,24 @@ class DemoDataSeeder extends Seeder
     {
         $faker = Faker::create();
 
+        // 0) CREAZIONE UTENTI GLOBALI (Senza gruppo associato)
+        $globalRoles = ['pi', 'manager', 'researcher', 'collaborator'];
+        
+        foreach ($globalRoles as $role) {
+            User::factory()->create([
+                'name' => ucfirst($role) . ' Global',
+                'email' => $role . '_global@example.com',
+                'password' => Hash::make('password'),
+                'global_role' => $role,
+                'group_id' => null, // Non appartengono a un gruppo specifico
+                'email_verified_at' => now(),
+            ]);
+        }
+
         // 1) Gruppi
         $groups = Group::factory()->count(3)->create();
 
-        // 2) Utenti
+        // 2) Utenti legati ai Gruppi
         $allUsers = collect();
 
         foreach ($groups as $group) {
@@ -32,6 +46,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'pi_' . $group->id . '@example.com',
                 'name'  => 'PI ' . $group->id,
                 'password' => Hash::make('password'),
+                'global_role' => 'pi',
                 'role'  => 'pi',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
@@ -41,6 +56,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'manager_' . $group->id . '@example.com',
                 'name'  => 'Manager ' . $group->id,
                 'password' => Hash::make('password'),
+                'global_role' => 'manager',
                 'role'  => 'manager',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
@@ -50,6 +66,7 @@ class DemoDataSeeder extends Seeder
                 'email' => 'researcher_' . $group->id . '@example.com',
                 'name'  => 'Researcher ' . $group->id,
                 'password' => Hash::make('password'),
+                'global_role' => 'researcher',
                 'role'  => 'researcher',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
@@ -59,14 +76,16 @@ class DemoDataSeeder extends Seeder
                 'email' => 'collaborator_' . $group->id . '@example.com',
                 'name'  => 'Collaborator ' . $group->id,
                 'password' => Hash::make('password'),
+                'global_role' => 'collaborator',
                 'role'  => 'collaborator',
                 'group_id' => $group->id,
                 'email_verified_at' => now(),
             ]);
 
-            $extraUsers = User::factory()->count(8)->create([
+            $extraUsers = User::factory()->count(5)->create([
                 'group_id' => $group->id,
-                'role' => $faker->randomElement(['researcher', 'collaborator']),
+                'global_role' => 'researcher',
+                'role' => 'researcher',
                 'email_verified_at' => now(),
             ]);
 
@@ -80,93 +99,36 @@ class DemoDataSeeder extends Seeder
 
         // 4) Progetti (group-centric)
         foreach ($groups as $group) {
-
             $groupUsers = $allUsers->where('group_id', $group->id);
-            $piForProject = $groupUsers->firstWhere('role', 'pi');
+            $piForProject = $groupUsers->firstWhere('global_role', 'pi');
 
-            $projects = Project::factory()->count(3)->create([
+            $projects = Project::factory()->count(2)->create([
                 'group_id' => $group->id,
             ]);
 
             foreach ($projects as $project) {
-
-                // PI nel progetto
+                // Assegnazione PI
                 $project->users()->attach($piForProject->id, [
                     'role' => 'pi',
-                    'effort' => 0.3,
+                    'effort' => 0.5,
                 ]);
 
-                // altri membri
-                $members = $groupUsers
-                    ->where('id', '!=', $piForProject->id)
-                    ->random(3);
-
+                // Assegnazione altri 2 membri casuali del gruppo
+                $members = $groupUsers->where('id', '!=', $piForProject->id)->random(2);
                 foreach ($members as $m) {
-                    $project->users()->syncWithoutDetaching([
-                        $m->id => [
-                            'role' => $m->role,
-                            'effort' => $faker->randomFloat(2, 0.1, 0.8),
-                        ],
+                    $project->users()->attach($m->id, [
+                        'role' => $m->global_role,
+                        'effort' => $faker->randomFloat(2, 0.1, 0.4),
                     ]);
                 }
 
                 // Milestone
-                Milestone::factory()->count(3)->create([
-                    'project_id' => $project->id,
-                ]);
+                Milestone::factory()->count(2)->create(['project_id' => $project->id]);
 
                 // Task
-                Task::factory()->count(6)->make()->each(function ($t) use ($project, $groupUsers) {
-                    $t->project_id = $project->id;
-                    $t->assignee_id = $groupUsers->random()->id;
-                    $t->save();
-                });
-
-                // Pubblicazioni
-                $pubs = Publication::factory()->count(2)->create();
-
-                foreach ($pubs as $pub) {
-
-                    $project->publications()->attach($pub->id);
-
-                    $coauthors = $groupUsers->random(3)->values();
-
-                    foreach ($coauthors as $i => $u) {
-                        Author::create([
-                            'publication_id' => $pub->id,
-                            'user_id' => $u->id,
-                            'position' => $i + 1,
-                            'is_corresponding' => $i === 0,
-                        ]);
-                    }
-
-                    $pub->tags()->attach($tags->random(2)->pluck('id'));
-
-                    $pub->attachments()->create([
-                        'title' => 'Manuscript PDF',
-                        'path' => 'docs/' . $pub->id . '_manuscript.pdf',
-                        'uploaded_by' => $piForProject->id,
-                    ]);
-
-                    $pub->comments()->create([
-                        'user_id' => $piForProject->id,
-                        'body' => 'Prima bozza pronta per revisione.',
-                    ]);
-                }
-
-                // Tag progetto
-                $project->tags()->attach($tags->random(3)->pluck('id'));
-
-                // Allegato progetto
-                $project->attachments()->create([
-                    'title' => 'Project Plan',
-                    'path' => 'docs/' . $project->code . '_plan.pdf',
-                    'uploaded_by' => $piForProject->id,
-                ]);
-
-                $project->comments()->create([
-                    'user_id' => $piForProject->id,
-                    'body' => 'Benvenuti nel progetto ' . $project->title . '!',
+                Task::factory()->count(3)->create([
+                    'project_id' => $project->id,
+                    'assignee_id' => $groupUsers->random()->id
                 ]);
             }
         }

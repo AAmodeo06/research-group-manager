@@ -8,7 +8,7 @@
     </x-slot>
 
     @php
-        $canManageTasks = in_array(auth()->user()->role, ['pi', 'manager']);
+        $canManageTasks = in_array(auth()->user()->global_role, ['pi', 'manager']);
     @endphp
 
     <div class="py-6">

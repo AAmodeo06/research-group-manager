@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $tasks = collect();
         $publications = collect();
 
-        if ($user->role === 'pi') {
+        if ($user->global_role === 'pi') {
 
             $projects = Project::whereHas('users', fn ($q) =>
                 $q->where('users.id', $user->id)
@@ -39,7 +39,7 @@ class DashboardController extends Controller
             )->get();
         }
 
-        if ($user->role === 'manager') {
+        if ($user->global_role === 'manager') {
 
             $projects = Project::whereHas('users', fn ($q) =>
                 $q->where('users.id', $user->id)
@@ -52,11 +52,11 @@ class DashboardController extends Controller
             )->get();
         }
 
-        if ($user->role === 'researcher' || $user->role === 'collaborator') {
+        if ($user->global_role === 'researcher' || $user->global_role === 'collaborator') {
 
             $tasks = Task::where('assignee_id', $user->id)->get();
 
-            if ($user->role === 'researcher') {
+            if ($user->global_role === 'researcher') {
                 $publications = Publication::whereHas('authors', fn ($q) =>
                     $q->where('user_id', $user->id)
                 )->get();

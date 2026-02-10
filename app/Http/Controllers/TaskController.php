@@ -1,7 +1,5 @@
 <?php
 
-// Realizzato da Andrea Amodeo
-
 namespace App\Http\Controllers;
 
 use App\Models\Task;
@@ -30,7 +28,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        abort_unless(in_array(auth()->user()->global_role, ['pi', 'manager']), 403);
 
         $projects = auth()->user()->projects()->with('users')->get();
         $users = User::all();
@@ -43,7 +41,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        abort_unless(in_array(auth()->user()->global_role, ['pi', 'manager']), 403);
 
         $projectIds = auth()->user()->projects()->pluck('projects.id');
 
@@ -58,10 +56,8 @@ class TaskController extends Controller
             'priority'    => 'required|in:low,medium,high',
         ]);
 
-        //l'utente deve essere membro del progetto
-        abort_unless($projectIds->contains((int) $data['project_id']),403);
+        abort_unless($projectIds->contains((int) $data['project_id']), 403);
 
-        //se è assegnato un responsabile, deve essere membro del progetto
         if (!empty($data['assignee_id'])) {
             $isMember = Project::find($data['project_id'])
                 ->users()
@@ -104,7 +100,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        abort_unless(in_array(auth()->user()->global_role, ['pi', 'manager']), 403);
 
         $projectIds = auth()->user()->projects()->pluck('projects.id');
         abort_unless($projectIds->contains((int) $task->project_id), 403);
@@ -120,7 +116,7 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        abort_unless(in_array(auth()->user()->role, ['pi', 'manager']),403);
+        abort_unless(in_array(auth()->user()->global_role, ['pi', 'manager']), 403);
 
         $projectIds = auth()->user()->projects()->pluck('projects.id');
         abort_unless($projectIds->contains((int) $task->project_id), 403);
@@ -156,7 +152,7 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        abort_unless(auth()->user()->role === 'pi', 403);
+        abort_unless(auth()->user()->global_role === 'pi', 403);
 
         $projectIds = auth()->user()->projects()->pluck('projects.id');
         abort_unless($projectIds->contains((int) $task->project_id), 403);

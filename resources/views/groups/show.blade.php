@@ -2,147 +2,107 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-secondary-900 leading-tight">
-                {{ $group->name }}
+                Gestione Gruppo: {{ $group->name }}
             </h2>
-
-            <a href="{{ route('projects.index') }}"
-               class="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700">
-                Vai alla sezione progetti
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="h-4 w-4"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
+            <div class="flex gap-4">
+                <a href="{{ route('group.edit') }}" class="inline-flex items-center px-4 py-2 bg-secondary-200 text-secondary-800 text-sm font-medium rounded hover:bg-secondary-300">
+                    Modifica Gruppo
+                </a>
+                <a href="{{ route('projects.index') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
+                    I miei progetti &rarr;
+                </a>
+            </div>
         </div>
     </x-slot>
 
     <div class="max-w-7xl mx-auto py-8 px-6 space-y-8">
-
-        {{-- Descrizione gruppo --}}
-        @if($group->description)
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold text-secondary-900 mb-2">
-                    Descrizione del gruppo
-                </h3>
-                <p class="text-secondary-700 text-sm">
-                    {{ $group->description }}
-                </p>
+        
+        {{-- Notifiche di successo o errore --}}
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                {{ session('success') }}
             </div>
         @endif
 
-        {{-- GRID: Membri + Progetti --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {{-- CARD: Membri --}}
-            <div class="bg-white rounded-lg shadow flex flex-col h-[420px]">
-                {{-- Header --}}
-                <div class="p-6 border-b border-secondary-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-secondary-900">
-                        Membri del gruppo
-                    </h3>
-                    <span class="text-sm text-secondary-600">
-                        {{ $group->users->count() }}
-                    </span>
-                </div>
-
-                {{-- Body scrollabile --}}
-                <div class="p-6 overflow-y-auto flex-1">
-                    @if($group->users->isEmpty())
-                        <p class="text-sm text-secondary-600">
-                            Nessun membro presente.
-                        </p>
-                    @else
-                        <table class="w-full text-sm border-collapse">
-                            <thead>
-                                <tr class="border-b border-secondary-200 text-left text-secondary-600">
-                                    <th class="py-2">Nome</th>
-                                    <th>Ruolo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($group->users as $user)
-                                    <tr class="border-b border-secondary-100 last:border-0">
-                                        <td class="py-3 font-medium text-secondary-900">
-                                            {{ $user->name }}
-                                        </td>
-                                        <td class="text-secondary-700">
-                                            {{ ucfirst($user->role) }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
+        @if($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                {{ $errors->first() }}
             </div>
+        @endif
 
-            {{-- CARD: Progetti --}}
-            <div class="bg-white rounded-lg shadow flex flex-col h-[420px]">
-                {{-- Header --}}
-                <div class="p-6 border-b border-secondary-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-secondary-900">
-                        Progetti del gruppo
-                    </h3>
-                    <span class="text-sm text-secondary-600">
-                        {{ $group->projects->count() }}
-                    </span>
-                </div>
-
-                {{-- Body scrollabile --}}
-                <div class="p-6 overflow-y-auto flex-1 space-y-3">
-                    @if($group->projects->isEmpty())
-                        <p class="text-sm text-secondary-600">
-                            Nessun progetto associato al gruppo.
-                        </p>
-                    @else
-                        @foreach($group->projects as $project)
-                            <div class="border border-secondary-200 rounded-lg p-4">
-                                <div class="flex items-center justify-between">
-                                    <a href="{{ route('projects.show', $project) }}"
-                                       class="font-semibold text-secondary-900 hover:text-primary-700">
-                                        {{ $project->title }}
-                                    </a>
-
-                                    <a href="{{ route('projects.show', $project) }}"
-                                       class="text-secondary-400 hover:text-primary-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             class="h-4 w-4"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </div>
-
-                                <div class="text-sm text-secondary-600 mt-1">
-                                    Stato: {{ $project->status }}
-                                </div>
-
-                                <div class="text-sm text-secondary-600">
-                                    Membri: {{ $project->users->count() }}
-                                </div>
-
-                                @if($project->description)
-                                    <p class="text-sm text-secondary-700 mt-2">
-                                        {{ \Illuminate\Support\Str::limit($project->description, 100) }}
-                                    </p>
-                                @endif
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-            </div>
-
+        {{-- Descrizione del Gruppo --}}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-sm font-semibold text-secondary-700 uppercase mb-2">Informazioni</h3>
+            <p class="text-secondary-900">{{ $group->description ?? 'Nessuna descrizione disponibile per questo gruppo.' }}</p>
         </div>
+
+        {{-- CARD: Gestione Membri --}}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6 border-b border-secondary-200 flex items-center justify-between bg-secondary-50">
+                <h3 class="text-lg font-semibold text-secondary-900">Membri del team</h3>
+                <span class="bg-primary-100 text-primary-800 text-xs font-bold px-3 py-1 rounded-full">
+                    {{ $group->users->count() }} utenti
+                </span>
+            </div>
+
+            {{-- Form Aggiunta Membro --}}
+            <div class="p-6 border-b border-secondary-200">
+                <form action="{{ route('groups.members.add') }}" method="POST" class="flex flex-col md:flex-row gap-4">
+                    @csrf
+                    <div class="flex-1">
+                        <select name="user_id" required class="w-full rounded-md border-secondary-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <option value="">Seleziona un utente senza gruppo da aggiungere...</option>
+                            @foreach($availableUsers as $available)
+                                <option value="{{ $available->id }}">{{ $available->name }} ({{ $available->email }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-primary-600 text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-primary-700 transition">
+                        Aggiungi al Gruppo
+                    </button>
+                </form>
+            </div>
+
+            {{-- Tabella Membri --}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-secondary-500">
+                    <thead class="text-xs text-secondary-700 uppercase bg-secondary-50">
+                        <tr>
+                            <th class="px-6 py-3">Nome</th>
+                            <th class="px-6 py-3">Email</th>
+                            <th class="px-6 py-3">Ruolo</th>
+                            <th class="px-6 py-3 text-right">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-100">
+                        @foreach($group->users as $member)
+                            <tr class="bg-white hover:bg-secondary-50 transition">
+                                <td class="px-6 py-4 font-medium text-secondary-900">{{ $member->name }}</td>
+                                <td class="px-6 py-4">{{ $member->email }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded-md text-xs font-medium {{ $member->global_role === 'pi' ? 'bg-purple-100 text-purple-800' : 'bg-secondary-100 text-secondary-800' }}">
+                                        {{ $member->roleLabel() }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    @if($member->id !== auth()->id())
+                                        <form action="{{ route('groups.members.remove', $member) }}" method="POST" onsubmit="return confirm('Rimuovere l\'utente dal gruppo? Non potrà più accedere ai progetti del gruppo.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 font-semibold text-xs">
+                                                RIMUOVI
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-secondary-400 text-xs italic">Tu</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </x-app-layout>

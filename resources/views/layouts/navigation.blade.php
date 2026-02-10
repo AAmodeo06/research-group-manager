@@ -19,7 +19,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if(auth()->user()->role === 'pi')
+                    @if(auth()->user()->global_role === 'pi')
                         <x-nav-link :href="route('group.show')" :active="request()->routeIs('group.show')">
                             {{ __('Il mio gruppo') }}
                         </x-nav-link>
@@ -33,7 +33,7 @@
                         {{ __('Publications') }}
                     </x-nav-link>
 
-                    @if(in_array(auth()->user()->role, ['manager','researcher','collaborator']))
+                    @if(in_array(auth()->user()->global_role, ['manager','researcher','collaborator']))
                         <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
                             {{ __('Tasks') }}
                         </x-nav-link>
@@ -111,7 +111,7 @@
                                        text-secondary-700 bg-white hover:text-primary-600 transition">
                                 <div>
                                     {{ Auth::user()->name }}
-                                    <span class="text-xs text-secondary-500">({{ Auth::user()->role }})</span>
+                                    <span class="text-xs text-secondary-500">({{ Auth::user()->global_role }})</span>
                                 </div>
 
                                 <div class="ms-1">
@@ -182,7 +182,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @if(auth()->user()->role === 'pi')
+            @if(auth()->user()->global_role === 'pi')
                 <x-responsive-nav-link :href="route('group.show')" :active="request()->routeIs('group.show')">
                     {{ __('Il mio gruppo') }}
                 </x-responsive-nav-link>
@@ -196,7 +196,7 @@
                 {{ __('Publications') }}
             </x-responsive-nav-link>
 
-            @if(in_array(auth()->user()->role, ['manager','researcher','collaborator']))
+            @if(in_array(auth()->user()->global_role, ['manager','researcher','collaborator']))
                 <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
                     {{ __('Tasks') }}
                 </x-responsive-nav-link>
