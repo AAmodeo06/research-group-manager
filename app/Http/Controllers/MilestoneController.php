@@ -53,12 +53,16 @@ class MilestoneController extends Controller
     {
         $this->authorizeProjectManagement($project);
 
+        abort_unless($milestone->project_id === $project->id, 403);
+
         return view('milestones.edit', compact('project', 'milestone'));
     }
 
     public function update(Request $request, Project $project, Milestone $milestone)
     {
         $this->authorizeProjectManagement($project);
+
+        abort_unless($milestone->project_id === $project->id, 403);
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
@@ -76,6 +80,8 @@ class MilestoneController extends Controller
     public function destroy(Project $project, Milestone $milestone)
     {
         $this->authorizeProjectManagement($project);
+
+        abort_unless($milestone->project_id === $project->id, 403);
 
         $milestone->delete();
 
