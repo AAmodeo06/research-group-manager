@@ -87,18 +87,29 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
 
     public function roleInProject(Project $project): ?string
     {
-        return $this->projects()
-            ->where('project_id', $project->id)
-            ->first()
-            ?->pivot
-            ?->role;
+        $member = $this->projects()->where('project_id', $project->id)->first();
+        return $member ? $member->pivot->role : null;
     }
 
     public function isPiOfProject(Project $project): bool
     {
+        if ($this->global_role === 'pi') {
+            return true;
+        }
+
         return $this->projects()
         ->where('project_id', $project->id)
-        ->where('role', 'pi')
+        ->where('project_user.role', 'pi')
         ->exists();
+    }
+
+    public function isGlobalPi(): bool
+    {
+        return $this->global_role === 'pi';
+    }
+
+    public function isSenior(): bool
+    {
+        return in_array($this->global_role, ['pi', 'manager']);
     }
 }
