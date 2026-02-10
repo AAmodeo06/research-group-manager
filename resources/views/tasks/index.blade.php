@@ -8,7 +8,7 @@
     </x-slot>
 
     @php
-        $canManageTasks = in_array(auth()->user()->role, ['pi', 'manager']);
+        $canManageTasks = in_array(auth()->user()->global_role, ['pi', 'manager']);
     @endphp
 
     <div class="py-6">
@@ -92,7 +92,7 @@
                                                 Modifica
                                             </a>
 
-                                            @if(auth()->user()->role === 'pi')
+                                            @if(auth()->user()->global_role === 'pi')
                                                 <form method="POST" action="{{ route('tasks.destroy', $task) }}" onsubmit="return confirm('Eliminare il task?');">
                                                     @csrf
                                                     @method('DELETE')

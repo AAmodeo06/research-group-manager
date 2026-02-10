@@ -111,7 +111,7 @@
                                        text-secondary-700 bg-white hover:text-primary-600 transition">
                                 <div>
                                     {{ Auth::user()->name }}
-                                    <span class="text-xs text-secondary-500">({{ Auth::user()->role }})</span>
+                                    <span class="text-xs text-secondary-500">({{ Auth::user()->roleLabel() }})</span>
                                 </div>
 
                                 <div class="ms-1">

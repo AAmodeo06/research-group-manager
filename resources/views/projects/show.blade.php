@@ -110,7 +110,7 @@
                     <h3 class="text-sm font-semibold text-secondary-700 uppercase">
                         Milestone ({{ $project->milestones ? $project->milestones->count() : 0 }})
                     </h3>
-                    @if(auth()->user()->isPiOfProject($project))
+                    @if(in_array(auth()->user()->global_role, ['pi', 'manager']))
                         <a href="{{ route('milestones.create', $project) }}" class="text-sm text-primary-600 hover:underline">
                             + Nuova milestone
                         </a>
@@ -141,7 +141,7 @@
                                     </span>
                                 </div>
 
-                                @if(auth()->user()->isPiOfProject($project))
+                                @if(in_array(auth()->user()->global_role, ['pi', 'manager']))
                                     <div class="flex items-center gap-3">
                                         <a href="{{ route('milestones.edit', [$project, $ms]) }}"
                                            class="text-xs text-yellow-600 hover:underline">
@@ -191,7 +191,7 @@
                     ← Torna ai progetti
                 </a>
 
-                @if(auth()->user()->isPiOfProject($project))
+                @if(in_array(auth()->user()->global_role, ['pi', 'manager']))
                     <div class="flex items-center gap-3">
                         <a href="{{ route('projects.edit', $project) }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
                             Modifica
