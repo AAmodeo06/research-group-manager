@@ -40,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:pi')->group(function () {
         Route::get('/group', [GroupController::class, 'show'])
             ->name('group.show');
+        Route::post('/group/members', [GroupController::class, 'addMember'])
+            ->name('group.members.add');
+        Route::delete('/group/members/{member}', [GroupController::class, 'removeMember'])
+            ->name('group.members.remove');
     });
 
     //Progetti
@@ -144,10 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     //Gestione Tasks
-    Route::middleware('role:manager,researcher,collaborator')->group(function () {
-
-        Route::resource('tasks', TaskController::class);
-    });
+    Route::resource('tasks', TaskController::class);
 
     //Commenti
     Route::post('/comments', [CommentController::class, 'store'])

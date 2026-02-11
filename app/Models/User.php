@@ -112,4 +112,15 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     {
         return in_array($this->global_role, ['pi', 'manager']);
     }
+
+    public function roleLabel(): string
+    {
+        return match ($this->global_role) {
+            'pi' => 'Principal Investigator',
+            'manager' => 'Project Manager',
+            'researcher' => 'Researcher',
+            'collaborator' => 'Collaborator',
+            default => ucfirst($this->global_role),
+        };
+    }
 }

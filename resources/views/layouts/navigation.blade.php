@@ -33,11 +33,9 @@
                         {{ __('Publications') }}
                     </x-nav-link>
 
-                    @if(in_array(auth()->user()->global_role, ['manager','researcher','collaborator']))
-                        <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
-                            {{ __('Tasks') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
+                        {{ __('Tasks') }}
+                    </x-nav-link>
                 </div>
                 @endauth
             </div>
@@ -196,11 +194,9 @@
                 {{ __('Publications') }}
             </x-responsive-nav-link>
 
-            @if(in_array(auth()->user()->global_role, ['manager','researcher','collaborator']))
-                <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
-                    {{ __('Tasks') }}
-                </x-responsive-nav-link>
-            @endif
+            <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')">
+                {{ __('Tasks') }}
+            </x-responsive-nav-link>
         </div>
         @endauth
 

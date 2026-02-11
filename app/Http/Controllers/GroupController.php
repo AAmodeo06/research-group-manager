@@ -28,7 +28,9 @@ class GroupController extends Controller
             'projects.users',
         ]);
 
-        return view('groups.show', compact('group'));
+        $availableUsers = User::whereNull('group_id')->get();
+
+        return view('groups.show', compact('group', 'availableUsers'));
     }
 
     public function edit()
