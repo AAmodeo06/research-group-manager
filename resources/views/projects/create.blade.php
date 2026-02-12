@@ -99,9 +99,9 @@
                             id="status"
                             required
                             class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="open">Open</option>
-                        <option value="in_progress">In progress</option>
-                        <option value="completed">Completed</option>
+                        <option value="open">open</option>
+                        <option value="in_progress">in progress</option>
+                        <option value="completed">completed</option>
                     </select>
                 </div>
 

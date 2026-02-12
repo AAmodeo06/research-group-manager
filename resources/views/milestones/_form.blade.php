@@ -1,6 +1,4 @@
 {{-- Realizzato da Cosimo Mandrillo --}}
-{{-- Realizzato da Andrea Amodeo --}}
-{{-- Realizzato da Luigi La Gioia --}}
 
 <form method="POST" action="{{ $action }}" class="bg-white p-6 rounded shadow space-y-4">
     @csrf
@@ -30,13 +28,13 @@
         <label class="block text-sm font-medium">Stato</label>
         <select name="status" class="w-full border rounded px-3 py-2">
             <option value="planned" @selected(old('status', $milestone->status ?? '') === 'planned')>
-                Pianificata
+                planned
             </option>
             <option value="in_progress" @selected(old('status', $milestone->status ?? '') === 'in_progress')>
-                In corso
+                in progress
             </option>
             <option value="completed" @selected(old('status', $milestone->status ?? '') === 'completed')>
-                Completata
+                completed
             </option>
         </select>
     </div>

@@ -1,6 +1,4 @@
 {{-- Realizzato da Cosimo Mandrillo --}}
-{{-- Realizzato da Andrea Amodeo --}}
-{{-- Realizzato da Luigi La Gioia --}}
 
 <x-app-layout>
     <x-slot name="header">

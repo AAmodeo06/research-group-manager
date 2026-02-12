@@ -77,13 +77,13 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Open,In progress,Completed',
+            'status' => 'required|string|in:open,in_progress,completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
 
         // Se il progetto è completato deve avere una data di fine
-        if ($validated['status'] === 'Completed' && empty($validated['end_date'])) {
+        if ($validated['status'] === 'completed' && empty($validated['end_date'])) {
             return back()
                 ->withErrors([
                     'end_date' => 'Un progetto completato deve avere una data di fine.'
@@ -180,13 +180,13 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Open,In progress,Completed',
+            'status' => 'required|string|in:open,in_progress,completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
 
         // Se il progetto è completato deve avere una data di fine
-        if ($data['status'] === 'Completed' && empty($data['end_date'])) {
+        if ($data['status'] === 'completed' && empty($data['end_date'])) {
             return back()
                 ->withErrors([
                     'end_date' => 'Un progetto completato deve avere una data di fine.'
