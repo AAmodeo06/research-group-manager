@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Andrea Amodeo --}}
 
 <x-app-layout>

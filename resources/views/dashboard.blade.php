@@ -1,3 +1,5 @@
+{{-- Realizzato da Luigi La Gioia --}}
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-secondary-800 leading-tight">

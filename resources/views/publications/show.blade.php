@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Luigi La Gioia --}}
 
 <x-app-layout>

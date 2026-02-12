@@ -1,3 +1,5 @@
+{{-- Realizzato da Cosimo Mandrillo --}}
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-secondary-900 leading-tight">
@@ -167,6 +169,56 @@
                 @endif
             </section>
 
+            {{-- Modificato da Andrea Amodeo --}}
+            @if($canViewProjectTasks)
+
+            <section>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-semibold text-secondary-700 uppercase">
+                        Task del progetto ({{ $project->tasks->count() }})
+                    </h3>
+
+                    @if($canViewProjectTasks)
+                        <a href="{{ route('tasks.create', $project) }}"
+                            class="text-sm text-primary-600 hover:underline">
+                                + Nuovo Task
+                        </a>
+                    @endif
+                </div>
+
+                @if($project->tasks->isEmpty())
+                    <p class="text-sm text-secondary-500">
+                        Nessun task associato a questo progetto.
+                    </p>
+                @else
+                    <ul class="space-y-2">
+                        @foreach($project->tasks as $task)
+                            <li class="flex justify-between items-center p-3 border rounded">
+                                <div>
+                                    <div class="font-medium text-secondary-900">
+                                        {{ $task->title }}
+                                    </div>
+
+                                    <div class="text-xs text-secondary-500">
+                                        Assegnato a:
+                                        {{ $task->assignee?->name ?? 'Non assegnato' }}
+                                    </div>
+                                </div>
+
+                                <a href="{{ route('tasks.show', $task) }}"
+                                    class="text-xs text-primary-600 hover:underline">
+                                    Dettagli
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
+
+            @endif
+            {{-- Fine modifica da Andrea Amodeo --}}
+
+
             <section>
                 <h3 class="text-sm font-semibold text-secondary-700 uppercase mb-2">
                     Pubblicazioni ({{ $project->publications ? $project->publications->count() : 0 }})
@@ -191,9 +243,14 @@
                     ← Torna ai progetti
                 </a>
 
-                @if(in_array(auth()->user()->global_role, ['pi', 'manager']))
+                @if(auth()->user()->global_role === 'pi')
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('projects.edit', $project) }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700">
+
+                        <a href="{{ route('projects.members', $project) }}"
+                            class="inline-flex items-center justify-center px-4 py-2 bg-secondary-200 text-secondary-800 text-sm rounded hover:bg-secondary-300">
+                             Gestisci membri
+                        </a>
+                        <a href="{{ route('projects.edit', $project) }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded hover:bg-primary-700 hover:text-white">
                             Modifica
                         </a>
 

@@ -20,7 +20,7 @@
             <a href="{{ route('register') }}"
                 class="inline-flex items-center justify-center px-6 py-3 text-base font-semibold
                     text-white bg-primary-600 rounded-lg
-                    transition-color">
+                    transition-color hover:text-white">
                 Registrati
             </a>
 

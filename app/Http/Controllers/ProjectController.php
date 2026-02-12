@@ -13,6 +13,16 @@ use App\Models\Attachment;
 
 class ProjectController extends Controller
 {
+    private function authorizeProjectPi(Project $project): void
+    {
+        $isPi = $project->users()
+            ->where('users.id', auth()->id())
+            ->where('project_user.role', 'pi')
+            ->exists();
+
+        abort_unless($isPi, 403);
+    }
+
     /**
      * Blocca l’accesso se il progetto non appartiene
      * al gruppo dell’utente autenticato
@@ -67,10 +77,19 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Planned,In progress,Completed',
+            'status' => 'required|string|in:Open,In progress,Completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
+
+        // Se il progetto è completato deve avere una data di fine
+        if ($validated['status'] === 'Completed' && empty($validated['end_date'])) {
+            return back()
+                ->withErrors([
+                    'end_date' => 'Un progetto completato deve avere una data di fine.'
+                ])
+                ->withInput();
+        }
 
         // Il progetto nasce nel gruppo del PI
         $validated['group_id'] = auth()->user()->group_id;
@@ -115,8 +134,11 @@ class ProjectController extends Controller
             'milestones',
             'publications',
             'tags',
-            'attachments'
+            'attachments',
+            'tasks.assignee'
         ]);
+
+        $user = auth()->user();
 
         // Se non PI, deve essere membro del progetto
         if (auth()->user()->global_role !== 'pi') {
@@ -127,19 +149,19 @@ class ProjectController extends Controller
             abort_unless($isMember, 403);
         }
 
-        return view('projects.show', compact('project'));
+        $canViewProjectTasks = $project->users()
+            ->where('users.id', $user->id)
+            ->whereIn('project_user.role', ['pi', 'manager'])
+            ->exists();
+
+        return view('projects.show', compact('project', 'canViewProjectTasks'));
     }
 
     public function edit(Project $project)
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isAuthorized = $project->users()
-            ->where('user_id', auth()->id())
-            ->whereIn('project_user.role', ['pi', 'manager'])
-            ->exists();
-
-        abort_unless($isAuthorized, 403);
+        $this->authorizeProjectPi($project);
 
         $project->load(['milestones', 'publications', 'users', 'attachments']);
 
@@ -150,12 +172,7 @@ class ProjectController extends Controller
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isAuthorized = $project->users()
-            ->where('user_id', auth()->id())
-            ->whereIn('project_user.role', ['pi', 'manager'])
-            ->exists();
-
-        abort_unless($isAuthorized, 403);
+        $this->authorizeProjectPi($project);
 
         $data = $request->validate([
             'title' => 'required|min:3|max:255',
@@ -163,10 +180,19 @@ class ProjectController extends Controller
             'funder' => 'nullable|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:Planned,In progress,Completed',
+            'status' => 'required|string|in:Open,In progress,Completed',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:pdf|max:2048',
         ]);
+
+        // Se il progetto è completato deve avere una data di fine
+        if ($data['status'] === 'Completed' && empty($data['end_date'])) {
+            return back()
+                ->withErrors([
+                    'end_date' => 'Un progetto completato deve avere una data di fine.'
+                ])
+                ->withInput();
+        }
 
         unset($data['group_id']); // il gruppo non si cambia
 
@@ -198,12 +224,7 @@ class ProjectController extends Controller
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isPi = $project->users()
-            ->where('user_id', auth()->id())
-            ->where('project_user.role', 'pi')
-            ->exists();
-
-        abort_unless($isPi, 403);
+        $this->authorizeProjectPi($project);
 
         foreach ($project->attachments()->where('type', 'project_file')->get() as $attachment) {
             Storage::disk('public')->delete($attachment->path);
@@ -220,12 +241,7 @@ class ProjectController extends Controller
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isAuthorized = $project->users()
-            ->where('users.id', auth()->id())
-            ->whereIn('project_user.role', ['pi', 'manager'])
-            ->exists();
-
-        abort_unless($isAuthorized, 403);
+        $this->authorizeProjectPi($project);
 
         // SOLO utenti del gruppo
         $users = User::where('group_id', $project->group_id)->get();
@@ -238,12 +254,7 @@ class ProjectController extends Controller
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isAuthorized = $project->users()
-            ->where('users.id', auth()->id())
-            ->whereIn('project_user.role', ['pi', 'manager'])
-            ->exists();
-
-        abort_unless($isAuthorized, 403);
+        $this->authorizeProjectPi($project);
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -294,12 +305,7 @@ class ProjectController extends Controller
     {
         $this->abortIfProjectNotInMyGroup($project);
 
-        $isAuthorized = $project->users()
-            ->where('users.id', auth()->id())
-            ->whereIn('project_user.role', ['pi', 'manager'])
-            ->exists();
-
-        abort_unless($isAuthorized, 403);
+        $this->authorizeProjectPi($project);
 
         abort_unless($user->group_id === auth()->user()->group_id, 403);
 

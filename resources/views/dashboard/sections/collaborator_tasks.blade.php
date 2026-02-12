@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Luigi La Gioia --}}
 
 <section class="bg-white rounded-xl border border-secondary-200 p-6">

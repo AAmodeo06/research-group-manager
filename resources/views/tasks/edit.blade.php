@@ -1,3 +1,5 @@
+{{-- Realizzato da Andrea Amodeo --}}
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-secondary-900 leading-tight">

@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Cosimo Mandrillo --}}
 
 <x-app-layout>
@@ -10,6 +9,17 @@
 
     <div class="py-8">
         <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow">
+
+            {{-- Errori di validazione --}}
+            @if ($errors->any())
+                <div class="mb-6 p-4 rounded bg-red-100 text-red-800 text-sm">
+                    <ul class="list-disc ml-4">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <form method="POST"
                   action="{{ route('projects.store') }}"
@@ -30,16 +40,29 @@
                            class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
 
-                {{-- Descrizione --}}
+                {{-- Codice --}}
                 <div>
-                    <label for="description" class="block text-sm font-medium text-secondary-700">
-                        Descrizione
+                    <label for="code" class="block text-sm font-medium text-secondary-700">
+                        Codice
                     </label>
-                    <textarea id="description"
-                              name="description"
-                              rows="4"
-                              class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">{{ old('description') }}</textarea>
+                    <input id="code"
+                           type="text"
+                           name="code"
+                           value="{{ old('code') }}"
+                           class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
+
+                {{-- Funder --}}
+                <div>
+                    <label for="funder" class="block text-sm font-medium text-secondary-700">
+                        Funder
+                    </label>
+                    <input id="funder"
+                           type="text"
+                           name="funder"
+                           value="{{ old('funder') }}"
+                           class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div> 
 
                 {{-- Data inizio --}}
                 <div>
@@ -56,7 +79,7 @@
                 {{-- Data fine --}}
                 <div>
                     <label for="end_date" class="block text-sm font-medium text-secondary-700">
-                        Data fine (opzionale)
+                        Data fine
                     </label>
                     <input type="date"
                            id="end_date"
@@ -67,7 +90,7 @@
                     </p>
                 </div>
 
-                {{-- Status --}}
+                {{-- Stato --}}
                 <div>
                     <label for="status" class="block text-sm font-medium text-secondary-700">
                         Stato
@@ -76,10 +99,21 @@
                             id="status"
                             required
                             class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="Open">Open</option>
-                        <option value="In progress">In progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="open">Open</option>
+                        <option value="in_progress">In progress</option>
+                        <option value="completed">Completed</option>
                     </select>
+                </div>
+
+                {{-- Descrizione --}}
+                <div>
+                    <label for="description" class="block text-sm font-medium text-secondary-700">
+                        Descrizione
+                    </label>
+                    <textarea id="description"
+                              name="description"
+                              rows="4"
+                              class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">{{ old('description') }}</textarea>
                 </div>
 
                 {{-- Documento PDF --}}

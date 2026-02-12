@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Cosimo Mandrillo --}}
 
 <x-app-layout>

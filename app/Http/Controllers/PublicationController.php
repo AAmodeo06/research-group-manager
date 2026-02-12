@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Storage;
 
 class PublicationController extends Controller
 {
+    private function authorizePublicationCreation(): void
+    {
+        abort_unless(
+            in_array(auth()->user()->global_role, ['pi', 'researcher']),
+            403
+        );
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -29,6 +37,8 @@ class PublicationController extends Controller
 
     public function create()
     {
+        $this->authorizePublicationCreation();
+
         $projects = Project::where('group_id', auth()->user()->group_id)->get();
 
         return view('publications.create', compact('projects'));
@@ -36,6 +46,8 @@ class PublicationController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizePublicationCreation();
+
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'type'             => 'nullable|string|max:100',
@@ -47,6 +59,15 @@ class PublicationController extends Controller
             'projects.*'       => 'exists:projects,id',
             'pdf'              => 'nullable|mimes:pdf|max:4096',
         ]);
+
+        foreach ($validated['projects'] as $projectId) {
+            abort_unless(
+                Project::where('id', $projectId)
+                    ->where('group_id', auth()->user()->group_id)
+                    ->exists(),
+                403
+            );
+        }
 
         // SOLO dati della publication
         $publication = Publication::create([
@@ -90,6 +111,8 @@ class PublicationController extends Controller
 
     public function edit(Publication $publication)
     {
+        $this->authorizePublicationCreation();
+
         $projects = Project::where('group_id', auth()->user()->group_id)->get();
 
         $publication->load('projects');
@@ -99,6 +122,8 @@ class PublicationController extends Controller
 
     public function update(Request $request, Publication $publication)
     {
+        $this->authorizePublicationCreation();
+
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'type'             => 'nullable|string|max:100',
@@ -110,6 +135,15 @@ class PublicationController extends Controller
             'projects.*'       => 'exists:projects,id',
             'pdf'              => 'nullable|mimes:pdf|max:4096',
         ]);
+
+        foreach ($validated['projects'] as $projectId) {
+            abort_unless(
+                Project::where('id', $projectId)
+                    ->where('group_id', auth()->user()->group_id)
+                    ->exists(),
+                403
+            );
+        }
 
         $publication->update([
             'title'           => $validated['title'],
@@ -146,6 +180,8 @@ class PublicationController extends Controller
 
     public function destroy(Publication $publication)
     {
+        abort_unless(auth()->user()->global_role === 'pi', 403);
+
         foreach ($publication->attachments as $attachment) {
             Storage::disk('public')->delete($attachment->path);
             $attachment->delete();

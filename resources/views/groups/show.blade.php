@@ -1,3 +1,5 @@
+{{-- Realizzato da Cosimo Mandrillo --}}
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -110,7 +112,7 @@
                                             {{ $member->name }}
                                         </td>
                                         <td class="text-secondary-700">
-                                            {{ ucfirst($member->role) }}
+                                            {{ ucfirst($member->global_role) }}
                                         </td>
                                         <td class="text-right">
                                             @if($member->id !== auth()->id())

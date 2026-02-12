@@ -1,4 +1,3 @@
-
 {{-- Realizzato da Cosimo Mandrillo --}}
 
 <x-app-layout>
@@ -66,7 +65,7 @@
                            class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
 
-                {{-- Date --}}
+                {{-- Data inizio --}}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-secondary-700">
@@ -83,6 +82,7 @@
                         </p>
                     </div>
 
+                    {{-- Data fine --}}
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-secondary-700">
                             Data fine
@@ -106,10 +106,10 @@
                     <select id="status"
                             name="status"
                             class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        @foreach(['Open','In progress','Completed'] as $status)
+                        @foreach(['open','in_progress','completed'] as $status)
                             <option value="{{ $status }}"
                                 @selected(old('status', $project->status) === $status)>
-                                {{ $status }}
+                                {{ ucfirst(str_replace('_', ' ', $status)) }}
                             </option>
                         @endforeach
                     </select>
@@ -129,7 +129,7 @@
                               class="mt-1 w-full rounded-md bg-secondary-50 text-secondary-900 border border-secondary-300 p-2 focus:outline-none focus:ring-2 focus:ring-primary-500">{{ old('description', $project->description) }}</textarea>
                 </div>
 
-                {{-- Documento (versioning) --}}
+                {{-- Documento PDF --}}
                 <div>
                     <label for="file" class="block text-sm font-medium text-secondary-700">
                         Documenti PDF
