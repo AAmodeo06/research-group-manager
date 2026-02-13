@@ -38,7 +38,7 @@
                                 {{-- TITOLO + PROGETTO --}}
                                 <td class="py-4">
                                     <div class="font-medium text-secondary-900">
-                                        <a href="{{ route('tasks.show', $task) }}"
+                                        <a href="{{ route('projects.tasks.show',[$task->project, $task]) . '?from=my' }}"
                                            class="hover:underline">
                                             {{ $task->title }}
                                         </a>

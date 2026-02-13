@@ -10,8 +10,10 @@
     <div class="py-6">
         <div class="max-w-3xl mx-auto bg-white shadow rounded-lg p-8">
 
-            <form method="POST" action="{{ route('tasks.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('tasks.store', $project) }}" class="space-y-4">
                 @csrf
+
+                <input type="hidden" name="project_id" value="{{ $project->id }}">
 
                 {{-- TITOLO --}}
                 <div>
@@ -34,25 +36,6 @@
                               class="w-full mt-1 rounded border-secondary-300">{{ old('description') }}</textarea>
                 </div>
 
-                {{-- PROGETTO --}}
-                <div>
-                    <label class="block text-sm font-medium">Progetto</label>
-                    <select name="project_id"
-                            required
-                            class="w-full mt-1 rounded border-secondary-300">
-                        <option value="">— Seleziona progetto —</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}"
-                                @selected(old('project_id') == $project->id)>
-                                {{ $project->title }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('project_id')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 {{-- ASSEGNATARIO --}}
                 <div>
                     <label class="block text-sm font-medium">Assegnatario</label>
@@ -60,15 +43,11 @@
                             class="w-full mt-1 rounded border-secondary-300">
                         <option value="">—</option>
 
-                        @foreach($projects as $project)
-                            <optgroup label="{{ $project->title }}">
-                                @foreach($project->users as $user)
-                                    <option value="{{ $user->id }}"
-                                        @selected(old('assignee_id') == $user->id)>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </optgroup>
+                        @foreach($project->users as $user)
+                            <option value="{{ $user->id }}"
+                                @selected(old('assignee_id') == $user->id)>
+                                    {{ $user->name }}
+                            </option>
                         @endforeach
                     </select>
                     @error('assignee_id')

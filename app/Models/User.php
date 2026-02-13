@@ -62,7 +62,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
 
     public function assignedTasks()
     {
-        return $this->hasMany(Task::class, 'assignee_id');
+        return $this->hasMany(\App\Models\Task::class, 'assignee_id');
     }
 
     public function attachments()

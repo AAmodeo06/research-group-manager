@@ -126,19 +126,25 @@
 
             {{-- AZIONI --}}
             <div class="flex justify-between pt-6 border-t">
-                <a href="{{ route('tasks.index') }}"
-                   class="text-primary-600 hover:underline">
-                    ← Torna ai task
-                </a>
-
+                @if($fromMyTasks)
+                    <a href="{{ route('tasks.index') }}"
+                       class="text-primary-600 hover:underline">
+                        ← Torna ai miei task
+                    </a>
+                @else
+                    <a href="{{ route('projects.show', $project) }}"
+                       class="text-primary-600 hover:underline">
+                        ← Torna al progetto
+                    </a>
+                @endif
                 <div class="flex gap-3">
-                    <a href="{{ route('tasks.edit', $task) }}"
+                    <a href="{{ route('projects.tasks.edit', [$project, $task]) }}"
                        class="px-4 py-2 bg-primary-600 text-white rounded">
                         Modifica
                     </a>
 
                     <form method="POST"
-                          action="{{ route('tasks.destroy', $task) }}"
+                          action="{{ route('projects.tasks.destroy', [$project, $task]) }}"
                           onsubmit="return confirm('Eliminare il task?');">
                         @csrf
                         @method('DELETE')

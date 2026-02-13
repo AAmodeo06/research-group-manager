@@ -45,10 +45,10 @@
                 <div>
                     <label class="block text-sm font-medium text-secondary-700">Stato</label>
                     <select name="status" class="mt-1 w-full rounded border-secondary-300">
-                        <option value="drafting">Drafting</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="published">Published</option>
+                        <option value="drafting">drafting</option>
+                        <option value="submitted">submitted</option>
+                        <option value="accepted">accepted</option>
+                        <option value="published">published</option>
                     </select>
                 </div>
 

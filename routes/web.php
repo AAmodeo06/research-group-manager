@@ -148,7 +148,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     //Gestione Tasks
-    Route::resource('tasks', TaskController::class);
+    Route::resource('projects.tasks', TaskController::class);
+
+    //I miei task
+    Route::get('/my-tasks', [TaskController::class, 'index'])
+        ->name('tasks.index');
 
     //Commenti
     Route::post('/comments', [CommentController::class, 'store'])

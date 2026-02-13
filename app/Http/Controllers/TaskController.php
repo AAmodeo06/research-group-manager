@@ -84,7 +84,7 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(Project $project, Task $task)
     {
         $task->load([
             'project',
@@ -95,7 +95,9 @@ class TaskController extends Controller
             'comments.user',
         ]);
 
-        return view('tasks.show', compact('task'));
+        $fromMyTasks = request()->query('from') === 'my';
+
+        return view('tasks.show', compact('task', 'project', 'fromMyTasks'));
     }
 
     /**
@@ -150,7 +152,7 @@ class TaskController extends Controller
         }
 
         return redirect()
-            ->route('tasks.show', $task)
+            ->route('projects.tasks.show', [$project, $task])
             ->with('success', 'Task aggiornato con successo.');
     }
 

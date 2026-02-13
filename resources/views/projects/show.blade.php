@@ -179,7 +179,7 @@
                     </h3>
 
                     @if($canViewProjectTasks)
-                        <a href="{{ route('tasks.create', $project) }}"
+                        <a href="{{ route('projects.tasks.create', $project) }}"
                             class="text-sm text-primary-600 hover:underline">
                                 + Nuovo Task
                         </a>
@@ -205,7 +205,7 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ route('tasks.show', $task) }}"
+                                <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
                                     class="text-xs text-primary-600 hover:underline">
                                     Dettagli
                                 </a>

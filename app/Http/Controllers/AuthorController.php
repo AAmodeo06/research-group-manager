@@ -26,6 +26,16 @@ class AuthorController extends Controller
                 ->withInput();
         }
 
+        $maxPosition = $publication->authors()->max('position') ?? 0;
+
+        if ($validated['position'] > $maxPosition + 1) {
+            return back()
+                ->withErrors([
+                    'position' => 'La posizione deve essere consecutiva. Prossima disponibile: ' . ($maxPosition + 1)
+                ])
+                ->withInput();
+        }
+
         // controllo sull'ordine
         if ($publication->authors()->where('position', $validated['position'])->exists()) {
             return back()
@@ -59,6 +69,14 @@ class AuthorController extends Controller
             'is_corresponding' => 'nullable|boolean',
         ]);
 
+        $maxPosition = $publication->authors()->max('position') ?? 0;
+
+        if ($validated['position'] > $maxPosition) {
+            return back()
+                ->withErrors(['position' => 'Posizione non valida.'])
+                ->withInput();
+        }
+
         // evita collisione di posizione con altri autori
         if (
             $publication->authors()
@@ -90,6 +108,12 @@ class AuthorController extends Controller
         abort_if($author->publication_id !== $publication->id, 404);
 
         $author->delete();
+
+        $authors = $publication->authors()->orderBy('position')->get();
+
+        foreach ($authors as $index => $a) {
+            $a->update(['position' => $index + 1]);
+        }
 
         return back()->with('success', 'Autore rimosso.');
     }

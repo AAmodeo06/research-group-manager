@@ -41,7 +41,7 @@
 
     <div class="flex justify-end gap-2">
         <a href="{{ route('projects.show', $project) }}"
-           class="text-sm text-gray-600 hover:underline">
+           class="inline-flex items-center justify-center text-sm text-gray-600 hover:underline">
             Annulla
         </a>
 
