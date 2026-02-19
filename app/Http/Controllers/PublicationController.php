@@ -180,7 +180,9 @@ class PublicationController extends Controller
 
     public function destroy(Publication $publication)
     {
-        abort_unless(auth()->user()->global_role === 'pi', 403);
+        $user = auth()->user();
+
+        abort_unless($user->global_role === 'pi' && $publication->projects()->where('group_id', $user->group_id)->exists(), 403);
 
         foreach ($publication->attachments as $attachment) {
             Storage::disk('public')->delete($attachment->path);

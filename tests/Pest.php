@@ -2,6 +2,7 @@
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Group;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /*
@@ -52,7 +53,11 @@ expect()->extend('toBeOne', function () {
 
 function verifiedUser(array $attributes = []): User
 {
+    $group = Group::factory()->create();
+
     return User::factory()->create(array_merge([
         'email_verified_at' => now(),
+        'global_role' => 'collaborator',
+        'group_id' => $group->id,
     ], $attributes));
 }

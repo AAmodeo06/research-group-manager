@@ -23,13 +23,13 @@ class DashboardController extends Controller
 
         $tasks = Task::where('assignee_id', $user->id)->get();
 
-        $publications = Publication::whereHas('projects.users', function ($q) use ($user) {
+        $publications = Publication::where(function ($query) use ($user) {
+            $query->whereHas('projects.users', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
-            })
-            ->orWhereHas('authors', function ($q) use ($user) {
+            })->orWhereHas('authors', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
-            })
-            ->get();
+            });
+        })->get();
 
         $taskStats = [
             'total'       => $tasks->count(),

@@ -50,10 +50,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects', [ProjectController::class, 'index'])
         ->name('projects.index');
 
-    // Fornisce i dati dei progetti in formato JSON
-    Route::get('/projects/json', [ProjectController::class, 'index'])
-        ->name('projects.json');
-
     Route::middleware('role:pi')->group(function () {
 
         Route::get('/projects/create', [ProjectController::class, 'create'])
@@ -86,23 +82,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('projects.show');
 
     // Milestones (legate ai progetti)
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/projects/{project}/milestones/create', [MilestoneController::class, 'create'])
+        ->name('milestones.create');
 
-        Route::get('/projects/{project}/milestones/create', [MilestoneController::class, 'create'])
-            ->name('milestones.create');
+    Route::get('/projects/{project}/milestones/{milestone}/edit', [MilestoneController::class, 'edit'])
+        ->name('milestones.edit');
 
-        Route::get('/projects/{project}/milestones/{milestone}/edit', [MilestoneController::class, 'edit'])
-            ->name('milestones.edit');
+    Route::post('/projects/{project}/milestones', [MilestoneController::class, 'store'])
+        ->name('milestones.store');
 
-        Route::post('/projects/{project}/milestones', [MilestoneController::class, 'store'])
-            ->name('milestones.store');
+    Route::put('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'update'])
+        ->name('milestones.update');
 
-        Route::put('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'update'])
-            ->name('milestones.update');
-
-        Route::delete('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])
-            ->name('milestones.destroy');
-    });
+    Route::delete('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])
+        ->name('milestones.destroy');
 
     //Pubblicazione progetti
     // Index + show per utenti autenticati
@@ -166,10 +159,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('notifications.read');
 });
 
-Route::get('/test-401', fn () => abort(401));
-Route::get('/test-403', fn () => abort(403));
-Route::get('/test-404', fn () => abort(404));
-Route::get('/test-419', fn () => abort(419));
-Route::get('/test-500', fn () => abort(500));
+if (app()->environment('local')) {
+    Route::get('/test-401', fn () => abort(401));
+    Route::get('/test-403', fn () => abort(403));
+    Route::get('/test-404', fn () => abort(404));
+    Route::get('/test-419', fn () => abort(419));
+    Route::get('/test-500', fn () => abort(500));
+}
+
 
 require __DIR__.'/auth.php';

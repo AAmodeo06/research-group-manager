@@ -1,6 +1,6 @@
 <?php
 
-//REALIZZATO DA: Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Notifications;
 
@@ -22,6 +22,7 @@ class TaskAssigned extends Notification
     public function __construct(Task $task)
     {
         $this->task = $task;
+        $this->afterCommit();
     }
 
     /**
@@ -41,9 +42,11 @@ class TaskAssigned extends Notification
     {
         return (new MailMessage)
             ->subject('Nuovo task assegnato')
-            ->line('Ti è stato assegnato un nuovo task:')
-            ->line($this->task->title)
-            ->action('Vai al task', url('/tasks/'.$this->task->id));
+            ->greeting('Ciao ' . $notifiable->name . ',')
+            ->line('Ti è stato assegnato un nuovo task nel progetto:')
+            ->line('Progetto: ' . $this->task->project->title)
+            ->line('Task: ' . $this->task->title)
+            ->action('Visualizza task', route('projects.tasks.show', [$this->task->project, $this->task]));
     }
 
     /**
@@ -54,9 +57,12 @@ class TaskAssigned extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'type' => 'task_assigned',
             'task_id' => $this->task->id,
-            'title' => $this->task->title,
-            'project' => $this->task->project->title
+            'task_title' => $this->task->title,
+            'project_id' => $this->task->project->id,
+            'project_title' => $this->task->project->title,
+            'assigned_at' => now(),
         ];
     }
 }

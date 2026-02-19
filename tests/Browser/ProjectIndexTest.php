@@ -1,26 +1,43 @@
 <?php
 
+//Realizzato da: Cosimo Mandrillo
+
 namespace Tests\Browser;
 
 use App\Models\User;
+use App\Models\Project;
+use App\Models\Group;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ProjectIndexTest extends DuskTestCase
 {
+    use DatabaseMigrations;
+
     /** @test */
-    public function user_can_view_projects_index()
+    public function test_pi_can_view_projects_index_with_content()
     {
-        $user = User::factory()->create([
+        $group = Group::factory()->create();
+
+        $pi = User::factory()->create([
             'email_verified_at' => now(),
-            'role' => 'pi',
+            'global_role' => 'pi',
+            'group_id' => $group->id,
         ]);
 
-        $this->browse(function (Browser $browser) use ($user) {
-            $browser
-                ->loginAs($user)
+        $project = Project::factory()->create([
+            'title' => 'Quantum AI Research',
+            'group_id' => $group->id,
+        ]);
+
+        $project->users()->attach($pi->id, ['role' => 'pi']);
+
+        $this->browse(function (Browser $browser) use ($pi) {
+            $browser->loginAs($pi)
                 ->visit('/projects')
-                ->assertSee('Projects');
+                ->pause(1000)
+                ->assertSee('Quantum AI Research');
         });
     }
 }

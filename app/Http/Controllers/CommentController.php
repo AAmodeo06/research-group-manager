@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da: Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Http\Controllers;
 
@@ -31,6 +31,6 @@ class CommentController extends Controller
             'commentable_id' => $data['commentable_id'],
         ]);
 
-        return redirect()->route('tasks.show', $task->id)->with('success', 'Commento aggiunto.');
+        return redirect()->route('projects.tasks.show', [$task->project_id, $task->id])->with('success', 'Commento aggiunto.');
     }
 }

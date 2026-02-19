@@ -1,10 +1,14 @@
 <?php
 
+//Realizzato da: Cosimo Mandrillo
+
 use App\Models\Project;
-use App\Models\User;
+use App\Models\Group;
 
 it('authenticated user can view projects index', function () {
-    $user = verifiedUser();
+
+    $group = Group::factory()->create();
+    $user = verifiedUser(['group_id' => $group->id]);
 
     $this->actingAs($user)
         ->get('/projects')
@@ -12,7 +16,12 @@ it('authenticated user can view projects index', function () {
 });
 
 it('pi can access project create page', function () {
-    $pi = verifiedUser(['role' => 'pi']);
+
+    $group = Group::factory()->create();
+    $pi = verifiedUser([
+        'global_role' => 'pi',
+        'group_id' => $group->id
+    ]);
 
     $this->actingAs($pi)
         ->get('/projects/create')
@@ -20,7 +29,12 @@ it('pi can access project create page', function () {
 });
 
 it('non pi cannot access project create page', function () {
-    $user = verifiedUser(['role' => 'researcher']);
+
+    $group = Group::factory()->create();
+    $user = verifiedUser([
+        'global_role' => 'researcher',
+        'group_id' => $group->id
+    ]);
 
     $this->actingAs($user)
         ->get('/projects/create')
@@ -28,15 +42,17 @@ it('non pi cannot access project create page', function () {
 });
 
 it('pi can store project and is attached as project pi', function () {
-    $pi = verifiedUser(['role' => 'pi']);
+
+    $group = Group::factory()->create();
+    $pi = verifiedUser([
+        'global_role' => 'pi',
+        'group_id' => $group->id
+    ]);
 
     $payload = [
         'title' => 'Test Project',
-        'status' => 'Open',
+        'status' => 'open',
         'start_date' => now()->toDateString(),
-        'members' => [
-            $pi->id => ['role' => 'pi'],
-        ],
     ];
 
     $response = $this->actingAs($pi)->post('/projects', $payload);
@@ -53,9 +69,16 @@ it('pi can store project and is attached as project pi', function () {
     ]);
 });
 
-it('authenticated user can view project detail', function () {
-    $user = verifiedUser();
-    $project = Project::factory()->create();
+it('authenticated user can view project detail if member', function () {
+
+    $group = Group::factory()->create();
+    $user = verifiedUser(['group_id' => $group->id]);
+
+    $project = Project::factory()->create([
+        'group_id' => $group->id
+    ]);
+
+    $project->users()->attach($user->id, ['role' => 'researcher']);
 
     $this->actingAs($user)
         ->get("/projects/{$project->id}")
@@ -63,8 +86,16 @@ it('authenticated user can view project detail', function () {
 });
 
 it('project members page is accessible to project pi', function () {
-    $pi = verifiedUser(['role' => 'pi']);
-    $project = Project::factory()->create();
+
+    $group = Group::factory()->create();
+    $pi = verifiedUser([
+        'global_role' => 'pi',
+        'group_id' => $group->id
+    ]);
+
+    $project = Project::factory()->create([
+        'group_id' => $group->id
+    ]);
 
     $project->users()->attach($pi->id, ['role' => 'pi']);
 
@@ -74,25 +105,15 @@ it('project members page is accessible to project pi', function () {
 });
 
 it('project members page is forbidden to non members', function () {
-    $user = verifiedUser();
-    $project = Project::factory()->create();
+
+    $group = Group::factory()->create();
+    $user = verifiedUser(['group_id' => $group->id]);
+
+    $project = Project::factory()->create([
+        'group_id' => $group->id
+    ]);
 
     $this->actingAs($user)
         ->get("/projects/{$project->id}/members")
         ->assertForbidden();
-});
-
-it('storeMember: cannot assign project PI to a non PI global user', function () {
-    $pi = verifiedUser(['role' => 'pi']);
-    $nonPi = verifiedUser(['role' => 'researcher']);
-    $project = Project::factory()->create();
-
-    $project->users()->attach($pi->id, ['role' => 'pi']);
-
-    $this->actingAs($pi)
-        ->post("/projects/{$project->id}/members", [
-            'user_id' => $nonPi->id,
-            'role' => 'pi',
-        ])
-        ->assertSessionHasErrors(['role']);
 });

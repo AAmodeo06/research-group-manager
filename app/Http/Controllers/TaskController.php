@@ -86,6 +86,8 @@ class TaskController extends Controller
      */
     public function show(Project $project, Task $task)
     {
+        abort_unless($task->project_id === $project->id, 403);
+
         $task->load([
             'project',
             'assignee',

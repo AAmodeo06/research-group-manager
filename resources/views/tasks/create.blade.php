@@ -10,7 +10,7 @@
     <div class="py-6">
         <div class="max-w-3xl mx-auto bg-white shadow rounded-lg p-8">
 
-            <form method="POST" action="{{ route('tasks.store', $project) }}" class="space-y-4">
+            <form method="POST" action="{{ route('projects.tasks.store', $project) }}" class="space-y-4">
                 @csrf
 
                 <input type="hidden" name="project_id" value="{{ $project->id }}">

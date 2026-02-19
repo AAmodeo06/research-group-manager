@@ -1,4 +1,7 @@
 <?php
+
+//Realizzato da: Andrea Amodeo
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,6 +14,7 @@ return new class extends Migration {
             $table->string('taggable_type');
             $table->index(['tag_id','taggable_id','taggable_type'],'taggables_all_idx');
             $table->foreign('tag_id')->references('id')->on('tags')->cascadeOnDelete();
+            $table->unique(['tag_id','taggable_id','taggable_type']);
         });
     }
     public function down(): void { Schema::dropIfExists('taggables'); }

@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Cosimo Mandrillo
+//Realizzato da: Cosimo Mandrillo
 
 namespace App\Models;
 

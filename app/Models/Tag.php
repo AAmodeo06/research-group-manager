@@ -13,10 +13,13 @@ class Tag extends Model
     
     protected $fillable = ['name'];
 
-    public function taggables()
+    public function projects()
     {
-        return $this->morphedByMany(
-            Project::class, 'taggable'
-        );
+        return $this->morphedByMany(Project::class, 'taggable');
+    }
+
+    public function tasks()
+    {
+        return $this->morphedByMany(Task::class, 'taggable');
     }
 }

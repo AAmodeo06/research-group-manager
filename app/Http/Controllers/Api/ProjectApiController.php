@@ -41,6 +41,8 @@ class ProjectApiController extends Controller
             'status'      => 'required|string',
         ]);
 
+        $data['group_id'] = $request->user()->group_id;
+
         $project = Project::create($data);
 
         // Associa automaticamente il PI creatore

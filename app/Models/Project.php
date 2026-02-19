@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Cosimo Mandrillo
+//Realizzato da: Cosimo Mandrillo
 
 namespace App\Models;
 
@@ -65,23 +65,31 @@ class Project extends Model
         return $this->belongsTo(Group::class);
     }
 
-    public function progressStatus()
+    public function progressStatus(): string
     {
-        if ($this->milestones()->count() === 0) return 'not_started';
+        $milestones = $this->milestones;
 
-        $completed = $this->milestones()->where('status','completed')->count();
-        $total = $this->milestones()->count();
+        if ($milestones->isEmpty()) {
+            return 'not_started';
+        }
 
-        if ($completed === $total) return 'completed';
-        return 'in_progress';
+        $completed = $milestones->where('status', 'completed')->count();
+
+        return $completed === $milestones->count()
+            ? 'completed'
+            : 'in_progress';
     }
 
-    public function progressPercentage()
+    public function progressPercentage():int
     {
-        $total = $this->milestones()->count();
-        if ($total === 0) return 0;
+        $milestones = $this->milestones;
 
-        $completed = $this->milestones()->where('status','completed')->count();
-        return (int) round(($completed/$total)*100);
+        if ($milestones->isEmpty()) {
+            return 0;
+        }
+
+        $completed = $milestones->where('status', 'completed')->count();
+
+        return (int) round(($completed / $milestones->count()) * 100);
     }
 }

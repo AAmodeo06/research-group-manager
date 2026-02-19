@@ -1,6 +1,6 @@
 <?php
 
-// Realizzato da Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Models;
 

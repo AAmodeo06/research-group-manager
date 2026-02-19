@@ -1,13 +1,14 @@
 <?php
 
-//Modificato da: Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Notifications;
 
+use App\Models\Task;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Task;
 
 class TaskDueSoon extends Notification
 {
@@ -21,6 +22,7 @@ class TaskDueSoon extends Notification
     public function __construct(Task $task)
     {
         $this->task = $task;
+        $this->afterCommit();
     }
     
     /**
@@ -30,7 +32,7 @@ class TaskDueSoon extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -40,10 +42,12 @@ class TaskDueSoon extends Notification
     {
         return (new MailMessage)
             ->subject('Task in scadenza')
-            ->line("Il task \"{$this->task->title}\" è in scadenza.")
-            ->line('Data di scadenza: ' . $this->task->due_date)
-            ->action('Visualizza task', url('/tasks/' . $this->task->id))
-            ->line('Per favore verifica lo stato del task.');
+            ->greeting('Ciao ' . $notifiable->name . ',')
+            ->line('Il seguente task è in scadenza:')
+            ->line('Progetto: ' . $this->task->project->title)
+            ->line('Task: ' . $this->task->title)
+            ->line('Scadenza: ' . $this->task->due_date)
+            ->action('Visualizza Task', route('projects.tasks.show', [$this->task->project, $this->task]));
     }
 
     /**
@@ -54,7 +58,13 @@ class TaskDueSoon extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'task_due_soon',
+            'task_id' => $this->task->id,
+            'task_title' => $this->task->title,
+            'project_id' => $this->task->project->id,
+            'project_title' => $this->task->project->title,
+            'due_date' => $this->task->due_date,
+            'notified_at' => now(),
         ];
     }
 }
