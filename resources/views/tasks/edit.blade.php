@@ -11,7 +11,7 @@
         <div class="max-w-3xl mx-auto bg-white shadow rounded-lg p-8">
 
             <form method="POST"
-                  action="{{ route('tasks.update', $task) }}"
+                  action="{{ route('projects.tasks.update', [$project, $task]) }}"
                   class="space-y-4">
                 @csrf
                 @method('PUT')
@@ -37,21 +37,13 @@
                               class="w-full rounded border-gray-300">{{ old('description', $task->description) }}</textarea>
                 </div>
 
-                {{-- PROGETTO --}}
+                {{-- PROGETTO (solo visualizzazione, non modificabile) --}}
                 <div>
                     <label class="block font-medium mb-1">Progetto</label>
-                    <select name="project_id"
-                            class="w-full rounded border-gray-300">
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}"
-                                @selected(old('project_id', $task->project_id) == $project->id)>
-                                {{ $project->title }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('project_id')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
+                    <input type="text"
+                           value="{{ $project->title }}"
+                           class="w-full rounded border-gray-300 bg-gray-100"
+                           disabled>
                 </div>
 
                 {{-- ASSEGNATARIO --}}
@@ -61,15 +53,11 @@
                             class="w-full rounded border-gray-300">
                         <option value="">—</option>
 
-                        @foreach($projects as $project)
-                            <optgroup label="{{ $project->title }}">
-                                @foreach($project->users as $user)
-                                    <option value="{{ $user->id }}"
-                                        @selected(old('assignee_id', $task->assignee_id) == $user->id)>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </optgroup>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}"
+                                @selected(old('assignee_id', $task->assignee_id) == $user->id)>
+                                {{ $user->name }}
+                            </option>
                         @endforeach
                     </select>
                     @error('assignee_id')
@@ -121,14 +109,14 @@
                         <label class="block font-medium mb-1">Scadenza</label>
                         <input type="date"
                                name="due_date"
-                               value="{{ old('due_date', $task->due_date) }}"
+                               value="{{ old('due_date', optional($task->due_date)->format('Y-m-d')) }}"
                                class="w-full rounded border-gray-300">
                     </div>
                 </div>
 
                 {{-- AZIONI --}}
                 <div class="flex justify-between pt-6">
-                    <a href="{{ route('tasks.index') }}"
+                    <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
                        class="text-primary-600 hover:underline">
                         ← Torna
                     </a>
