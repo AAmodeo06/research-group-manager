@@ -30,7 +30,7 @@ class ProjectFactory extends Factory
             'funder'      => $this->faker->randomElement(['MUR','EU','MIUR','Regione Puglia']),
             'start_date'  => $this->faker->date(),
             'end_date'    => null,
-            'status'      => $this->faker->randomElement(['active','completed','on-hold']),
+            'status'      => $this->faker->randomElement(['open','in_progress','completed']),
             'description' => $this->faker->paragraph(),
         ];
     }

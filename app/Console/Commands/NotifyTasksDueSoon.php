@@ -1,36 +1,40 @@
 <?php
 
-//Modificato da: Andrea Amodeo
+//Realizzato da: Andrea Amodeo
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Task;
-use Carbon\Carbon;
 use App\Notifications\TaskDueSoon;
+use Carbon\Carbon;
 
-class CheckOverdueTasks extends Command
+class NotifyTasksDueSoon extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'tasks:check-due';
+    protected $signature = 'tasks:notify-due-soon';
+    
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Notify users about tasks that are due soon';
+    protected $description = 'Invia notifiche per task in scadenza nei prossimi 2 giorni';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $tasks = Task::where('due_date', '<=', Carbon::now()->addDays(2))
+        $today = Carbon::today();
+        $limit = Carbon::today()->addDays(2);
+
+        $tasks = Task::whereBetween('due_date', [$today, $limit])
             ->where('status', '!=', 'completed')
             ->with('assignee')
             ->get();
@@ -41,8 +45,6 @@ class CheckOverdueTasks extends Command
             }
         }
 
-        $this->info('Task due notifications sent.');
-
-        return Command::SUCCESS;
+        $this->info('Notifiche task in scadenza inviate.');
     }
 }

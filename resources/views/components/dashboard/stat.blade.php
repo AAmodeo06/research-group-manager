@@ -1,3 +1,5 @@
+{{-- Realizzato da Luigi La Gioia --}}
+
 @props([
     'title',
     'value',

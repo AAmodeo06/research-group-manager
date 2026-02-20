@@ -62,7 +62,7 @@
                         <select name="status" class="w-full rounded border-secondary-300">
                             <option value="open" @selected(old('status','open') === 'open')>Open</option>
                             <option value="in_progress" @selected(old('status') === 'in_progress')>In progress</option>
-                            <option value="done" @selected(old('status') === 'done')>Done</option>
+                            <option value="completed" @selected(old('status') === 'completed')>Completed</option>
                         </select>
                     </div>
 

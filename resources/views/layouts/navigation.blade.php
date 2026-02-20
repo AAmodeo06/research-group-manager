@@ -11,6 +11,7 @@
                     </a>
                 </div>
 
+                {{-- Modificato da Andrea Amodeo --}}
                 <!-- Navigation Links -->
                 @auth
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex h-full items-center">
@@ -38,6 +39,7 @@
                     </x-nav-link>
                 </div>
                 @endauth
+                {{-- Fine modifica --}}
             </div>
 
             <!-- Settings Dropdown -->
@@ -47,6 +49,7 @@
                 <!-- Notifications + User -->
                 <div class="flex items-center h-full gap-4">
 
+                    {{-- Modificato da Andrea Amodeo --}}
                     <!-- Notifications -->
                     <div class="relative flex items-center h-full">
                         <x-dropdown align="right" width="80">
@@ -86,10 +89,10 @@
                                        <button
                                             class="w-full text-left px-4 py-2 hover:bg-secondary-100 transition">
                                             <div class="font-medium text-sm text-secondary-800">
-                                                {{ $notification->data['title'] }}
+                                                {{ $notification->data['task_title'] ?? '' }}
                                             </div>
                                             <div class="text-xs text-secondary-500">
-                                                {{ $notification->data['project'] }}
+                                                {{ $notification->data['project_title'] ?? '' }}
                                             </div>
                                         </button>
                                     </form>
@@ -101,6 +104,7 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
+                    {{-- Fine modifica --}}
 
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
@@ -174,6 +178,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
 
+        {{-- Modificato da Andrea Amodeo --}}
         @auth
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -199,6 +204,7 @@
             </x-responsive-nav-link>
         </div>
         @endauth
+        {{-- Fine modifica --}}
 
         <div class="pt-4 pb-1 border-t border-secondary-200">
             @auth

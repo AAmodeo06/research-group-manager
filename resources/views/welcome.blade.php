@@ -1,3 +1,5 @@
+{{-- Realizzato da Andrea Amodeo --}}
+
 @extends('layouts.public')
 
 @section('content')

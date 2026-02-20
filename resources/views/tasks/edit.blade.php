@@ -91,9 +91,9 @@
                                 @selected(old('status', $task->status) === 'in_progress')>
                                 In progress
                             </option>
-                            <option value="done"
-                                @selected(old('status', $task->status) === 'done')>
-                                Done
+                            <option value="completed"
+                                @selected(old('status', $task->status) === 'completed')>
+                                Completed
                             </option>
                         </select>
                     </div>
